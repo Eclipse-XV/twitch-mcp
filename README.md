@@ -7,6 +7,17 @@ described by Max.
 
 This project is described in a bit more detail on my blog: https://tomcools.be/post/2025-jan-twitch-chat-mcp/
 
+## Required Environment Variables
+
+The following environment variables need to be set to run the application:
+
+- `TWITCH_CHANNEL`: Your Twitch channel name (without the #)
+- `TWITCH_AUTH`: Your Twitch OAuth token (should start with 'oauth:')
+- `TWITCH_CLIENT_ID`: Your Twitch application client ID
+- `TWITCH_BROADCASTER_ID`: Your Twitch broadcaster ID
+
+You can set these either as environment variables or pass them as system properties when running the application.
+
 ## Building the MCP Server
 
 This application is currently not pushed to Maven Central, so you need to build it locally and install it in your .m2
@@ -22,8 +33,7 @@ Run `npx @modelcontextprotocol/inspector` to start a local inspector service.
 
 - Create an MCP configuration to run the following
     - command: `jbang`
-    -
-    arguments: `["--quiet", "-Dtwitch.channel=YOUR_CHANNEL_NAME", "-Dtwitch.auth=YOUR_API_KEY", "be.tomcools:twitch-mcp:1.0.0-SNAPSHOT:runner"]`
+    - arguments: `["--quiet", "-Dtwitch.channel=YOUR_CHANNEL_NAME", "-Dtwitch.auth=YOUR_API_KEY", "-Dtwitch.client_id=YOUR_CLIENT_ID", "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID", "be.tomcools:twitch-mcp:1.0.0-SNAPSHOT:runner"]`
 
 Now you can manually call the tools.
 
@@ -40,6 +50,8 @@ For Claude in claude_desktop_config.json
         "--quiet",
         "-Dtwitch.channel=YOUR_CHANNEL_NAME",
         "-Dtwitch.auth=YOUR_API_KEY",
+        "-Dtwitch.client_id=YOUR_CLIENT_ID",
+        "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
         "be.tomcools:twitch-mcp:1.0.0-SNAPSHOT:runner"
       ]
     }
