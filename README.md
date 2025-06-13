@@ -1,11 +1,26 @@
 # Twitch MCP Server
 
-I got inspired to build this because of the following blog post
-by [Max Rydahl Andersen](https://quarkus.io/author/maxandersen): https://quarkus.io/blog/mcp-server/.
-I had written a Twitch Chat integration before, so decided to combine that knowledge with a Quarkus based MCP server as
-described by Max.
+This project is a fork and expansion of [TomCools' Twitch MCP Server](https://github.com/tomcools/twitch-mcp), which implements a Model Context Protocol (MCP) server that integrates with Twitch chat, allowing AI assistants like Claude to interact with your Twitch channel. The original project was inspired by [Max Rydahl Andersen's blog post](https://quarkus.io/blog/mcp-server/) about MCP servers and combines that knowledge with Twitch chat integration.
 
-This project is described in a bit more detail on my blog: https://tomcools.be/post/2025-jan-twitch-chat-mcp/
+## Project Overview
+
+The server uses Quarkus and Apache Camel to create a bridge between Twitch chat and the MCP protocol, enabling AI assistants to:
+- Read messages from your Twitch chat
+- Send messages to your Twitch chat
+- Interact with your channel in real-time
+
+Our fork expands on TomCools' work by:
+- Adding support for more Twitch chat commands and interactions
+- Improving error handling and logging
+- Adding additional configuration options
+- Enhancing the MCP protocol implementation
+
+## Prerequisites
+
+- Java 21 or later
+- Maven
+- JBang (for running the application)
+- A Twitch account and application credentials
 
 ## Required Environment Variables
 
@@ -18,33 +33,45 @@ The following environment variables need to be set to run the application:
 
 You can set these either as environment variables or pass them as system properties when running the application.
 
-## Building the MCP Server
+## Building the Project
 
-This application is currently not pushed to Maven Central, so you need to build it locally and install it in your .m2
-folder using `mvn install`.
-Next we need a way to start the JAR file. In the examples below you'll see I
-used [JBang](https://www.jbang.dev/documentation/guide/latest/installation.html).
+1. Clone the repository
+2. Build the project using Maven:
+```bash
+mvn clean install
+```
 
-## Running the MCP server
+## Running the MCP Server
 
-### With MCP Inspector
+### Using MCP Inspector
 
-Run `npx @modelcontextprotocol/inspector` to start a local inspector service.
+1. Install and run the MCP Inspector:
+```bash
+npx @modelcontextprotocol/inspector
+```
 
-- Create an MCP configuration to run the following
-    - command: `jbang`
-    - arguments: `["--quiet", "-Dtwitch.channel=YOUR_CHANNEL_NAME", "-Dtwitch.auth=YOUR_API_KEY", "-Dtwitch.client_id=YOUR_CLIENT_ID", "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID", "be.tomcools:twitch-mcp:1.0.0-SNAPSHOT:runner"]`
+2. Create an MCP configuration with the following settings:
+- Command: `jbang`
+- Arguments: 
+```json
+[
+  "--quiet",
+  "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+  "-Dtwitch.auth=YOUR_API_KEY",
+  "-Dtwitch.client_id=YOUR_CLIENT_ID",
+  "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+  "be.tomcools:twitch-mcp:1.0.0-SNAPSHOT:runner"
+]
+```
 
-Now you can manually call the tools.
+### Using Claude Desktop
 
-### With Claude Desktop
-
-For Claude in claude_desktop_config.json
+Add the following configuration to your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "twitch-mcp-tomcools": {
+    "twitch-mcp": {
       "command": "jbang",
       "args": [
         "--quiet",
@@ -59,4 +86,13 @@ For Claude in claude_desktop_config.json
 }
 ```
 
-After restart, the tool should appear in your Claude UI.
+After adding the configuration and restarting Claude Desktop, the Twitch MCP tool will be available in your Claude UI.
+
+## Development
+
+The project uses:
+- Quarkus 3.17.7
+- Apache Camel Quarkus 3.17.0
+- Java 21
+- Maven for build management
+- JBang for running the application
