@@ -43,3 +43,13 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 # TLS Certificates
 .certs/
+
+# Debug logs
+*.log
+*.log.*
+twitch_debug.log*
+
+# Environment and secrets
+*.env
+application-local.properties
+application-dev.properties

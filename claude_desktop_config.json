@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "twitch-mcp-tomcools": {
+      "command": "jbang",
+      "args": [
+        "--quiet",
+        "-Dtwitch.channel=Eclipse_XV",
+        "-Dtwitch.auth=90xu7c5wu2o39g26qj6mgspw8mgebh",
+        "-Dtwitch.client_id=gp762nuuoqcoxypju8c569th9wz7q5",
+        "-Dtwitch.broadcaster_id=758584874",
+        "be.tomcools:twitch-mcp:1.0.0-SNAPSHOT:runner"
+      ]
+    }
+  }
+}
