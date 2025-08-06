@@ -31,6 +31,10 @@ The following environment variables need to be set to run the application:
 - `TWITCH_CLIENT_ID`: Your Twitch application client ID
 - `TWITCH_BROADCASTER_ID`: Your Twitch broadcaster ID
 
+### Optional Configuration
+
+- `TWITCH_SHOW_CONNECTION_MESSAGE`: Set to `true` to show "Twitch MCP Server connected" message on startup (default: `false`)
+
 You can set these either as environment variables or pass them as system properties when running the application.
 
 ## Building the Project
@@ -96,3 +100,7 @@ The project uses:
 - Java 21
 - Maven for build management
 - JBang for running the application
+
+## License
+
+This project is open source and available under the MIT License.
