@@ -1,6 +1,7 @@
 package be.tomcools.twitchmcp.client;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class CamelRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        String twitchIrcUrl = "irc:%s@irc.chat.twitch.tv:6667?nickname=%s&password=oauth:%s&channels=#%s"
+        String twitchIrcUrl = "irc:%s@irc.chat.twitch.tv:6667?nickname=%s&password=oauth:%s&channels=#%s&autoRejoin=true&persistent=true&colors=false&onReply=true&onNick=false&onQuit=false&onJoin=false&onKick=false&onMode=false&onPart=false&onTopic=false&commandTimeout=5000"
                 .formatted(channel, channel, authToken, channel);
 
         // Receives messages from Twitch Chat and logs them.
@@ -63,12 +64,29 @@ public class CamelRoute extends RouteBuilder {
         // Allows us to send messages to Twitch
         from("direct:sendToIrc")
                 .routeId("sendMessageToTwitch")
+                .errorHandler(deadLetterChannel("direct:sendError").maximumRedeliveries(3).redeliveryDelay(1000))
                 .process(exchange -> {
+                    // Log outgoing message
+                    String message = exchange.getMessage().getBody(String.class);
+                    System.out.println("Sending to Twitch: " + message);
                 })
                 .setHeader("irc.sendTo", constant("#" + channel))
                 .setBody(simple("${body}"))
                 .to(twitchIrcUrl)
                 .process(exchange -> {
+                    System.out.println("Message sent successfully");
+                });
+
+        // Error handling for failed sends
+        from("direct:sendError")
+                .routeId("handleSendError")
+                .process(exchange -> {
+                    String message = exchange.getMessage().getBody(String.class);
+                    Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+                    System.err.println("Failed to send message after retries: " + message);
+                    if (cause != null) {
+                        System.err.println("Error: " + cause.getMessage());
+                    }
                 });
     }
 
