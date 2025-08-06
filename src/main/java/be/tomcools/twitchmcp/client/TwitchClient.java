@@ -39,6 +39,9 @@ public class TwitchClient {
     @ConfigProperty(name = "twitch.broadcaster_id")
     String broadcasterId;
 
+    @ConfigProperty(name = "twitch.show_connection_message", defaultValue = "false")
+    boolean showConnectionMessage;
+
     // List of descriptors and associated keywords
     private static final Map<String, List<String>> DESCRIPTOR_KEYWORDS = Map.of(
         "toxic", List.of("idiot", "stupid", "hate", "kill", "dumb", "trash", "noob", "loser", "shut up", "annoying", "toxic", "rude", "mean", "sucks", "bad", "worst", "report", "ban"),
@@ -52,7 +55,9 @@ public class TwitchClient {
 
     // Post something to the Twitch chat after connect.
     void onStart(@Observes StartupEvent ev) {
-        this.sendMessage("Twitch MCP Server connected");
+        if (showConnectionMessage) {
+            this.sendMessage("Twitch MCP Server connected");
+        }
     }
 
     public String createPoll(String title, List<String> choices, int duration) throws Exception {
