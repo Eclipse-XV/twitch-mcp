@@ -53,3 +53,4 @@ twitch_debug.log*
 *.env
 application-local.properties
 application-dev.properties
+claude_desktop_config.json
