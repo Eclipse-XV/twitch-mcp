@@ -2,159 +2,336 @@
 
 This project is a fork and expansion of [TomCools' Twitch MCP Server](https://github.com/tomcools/twitch-mcp), which implements a Model Context Protocol (MCP) server that integrates with Twitch chat, allowing AI assistants like Claude to interact with your Twitch channel. The original project was inspired by [Max Rydahl Andersen's blog post](https://quarkus.io/blog/mcp-server/) about MCP servers and combines that knowledge with Twitch chat integration.
 
-## Project Overview
+## 🚀 Quick Start Guide
 
-The server uses Quarkus and Apache Camel to create a bridge between Twitch chat and the MCP protocol, enabling AI assistants to interact with your Twitch channel through the following tools:
+**Complete these 5 simple steps to get your Twitch AI assistant running:**
 
-### Available Tools
+1. **Install Java and Maven** (see detailed instructions below)
+2. **Get your Twitch information** (broadcaster ID, API key, etc.)
+3. **Download and build this project**
+4. **Connect to your AI tool** (Claude, LM Studio, etc.)
+5. **Start chatting with AI about your Twitch stream!**
 
-**Chat & Moderation:**
-- `sendMessageToChat` - Send messages to your Twitch chat
-- `getRecentChatLog` - Get the last 20 chat messages for moderation context
-- `analyzeChat` - Analyze recent chat messages and provide topic/activity summary
-- `timeoutUser` - Timeout users in chat (supports username or descriptive targeting)
-- `banUser` - Ban users from chat (supports username or descriptive targeting)
+## 💻 Step 1: Install Java and Maven (For Beginners)
 
-**Stream Management:**
-- `updateStreamTitle` - Update your stream title
-- `updateStreamCategory` - Update the game category of your stream
-- `createTwitchClip` - Create a clip of the current stream
+### Installing Java 21
 
-**Interactive Features:**
-- `createTwitchPoll` - Create polls with custom choices and duration
-- `createTwitchPrediction` - Create predictions with custom outcomes and duration
+**Windows:**
+1. Go to [Oracle's Java download page](https://www.oracle.com/java/technologies/downloads/)
+2. Click **Windows** → **x64 Installer** to download the `.exe` file
+3. Run the downloaded file and follow the prompts
+4. **Set Environment Variables:**
+   - Press `Win + S`, search "Environment Variables", click it
+   - Click "New" under System Variables
+   - Variable Name: `JAVA_HOME`
+   - Variable Value: `C:\Program Files\Java\jdk-21` (or wherever Java installed)
+   - Select "Path" variable, click "Edit", add `%JAVA_HOME%\bin`
 
-Our fork expands on TomCools' work by:
-- Adding comprehensive stream management tools (title, category updates)
-- Implementing advanced moderation features with AI-assisted targeting
-- Adding interactive engagement tools (polls, predictions, clips)
-- Providing chat analysis and monitoring capabilities
-- Improving error handling and logging
-- Enhancing the MCP protocol implementation
+**Mac:**
+1. **Option A (Easy):** Install [Homebrew](https://brew.sh/), then run: `brew install openjdk@21`
+2. **Option B:** Download from [Oracle](https://www.oracle.com/java/technologies/downloads/), get the `.dmg` file, double-click and follow instructions
+3. **Set Environment:** Add to `~/.zshrc` (or `~/.bash_profile`):
+   ```bash
+   export JAVA_HOME=/usr/local/opt/openjdk@21
+   export PATH=$JAVA_HOME/bin:$PATH
+   ```
 
-## Prerequisites
-
-- Java 21 or later
-- Maven
-- A Twitch account and application credentials
-
-## Setup
-
-### 1. Build the Project
-
-1. Clone the repository
-2. Build the project using Maven:
+**Linux (Ubuntu/Debian):**
 ```bash
-mvn clean install
+sudo apt update
+sudo apt install openjdk-21-jdk
 ```
 
-This creates the executable JAR file at `target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar`.
+**Verify Java Installation:**
+Open a terminal/command prompt and type: `java -version`
+You should see something like: `java version "21.0.8"`
 
-### 2. Configuration
+### Installing Maven
 
-Configure your Twitch credentials by replacing the placeholder values in the commands below:
+**Windows:**
+1. Download [Apache Maven](https://maven.apache.org/download.cgi) - get the `apache-maven-x.x.x-bin.zip` file
+2. Extract to a folder like `C:\apache-maven`
+3. **Set Environment Variables:**
+   - Add new system variable: `MAVEN_HOME` = `C:\apache-maven`
+   - Edit Path variable, add: `%MAVEN_HOME%\bin`
 
-- `YOUR_CHANNEL_NAME`: Your Twitch channel name (without the #)
-- `YOUR_API_KEY`: Your Twitch OAuth token (should start with 'oauth:')
-- `YOUR_CLIENT_ID`: Your Twitch application client ID  
-- `YOUR_BROADCASTER_ID`: Your Twitch broadcaster ID
-
-#### Optional Configuration
-
-- `TWITCH_SHOW_CONNECTION_MESSAGE`: Set to `true` to show "Twitch MCP Server connected" message on startup (default: `false`)
-
-## Integration
-
-**Important**: Only one client can connect to the MCP server at a time. You cannot have multiple tools (e.g., Claude Code and LM Studio) connected simultaneously. Ensure the previous connection is closed before starting a new one.
-
-### Claude Code
-
-Configure the MCP server with user scope:
-
+**Mac:**
 ```bash
-claude-code mcp install --user twitch-mcp java -Dtwitch.channel=YOUR_CHANNEL_NAME -Dtwitch.auth=YOUR_API_KEY -Dtwitch.client_id=YOUR_CLIENT_ID -Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID -jar /path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
+brew install maven
 ```
 
-Replace `/path/to/your/twitch-mcp` with the actual path to your project directory.
-
-### Claude Desktop
-
-Add the following configuration to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "twitch-mcp": {
-      "command": "java",
-      "args": [
-        "-Dtwitch.channel=YOUR_CHANNEL_NAME",
-        "-Dtwitch.auth=YOUR_API_KEY",
-        "-Dtwitch.client_id=YOUR_CLIENT_ID",
-        "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
-        "-jar",
-        "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
-      ]
-    }
-  }
-}
-```
-
-Replace `/path/to/your/twitch-mcp` with the actual path to your project directory. After adding the configuration and restarting Claude Desktop, the Twitch MCP tool will be available in your Claude UI.
-
-### LM Studio
-
-Add the following to your `mcp.json` configuration file:
-
-```json
-{
-  "mcpServers": {
-    "twitch-mcp": {
-      "command": "java",
-      "args": [
-        "-Dtwitch.channel=YOUR_CHANNEL_NAME",
-        "-Dtwitch.auth=YOUR_API_KEY",
-        "-Dtwitch.client_id=YOUR_CLIENT_ID",
-        "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
-        "-jar",
-        "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
-      ],
-      "env": {}
-    }
-  }
-}
-```
-
-Replace `/path/to/your/twitch-mcp` with the actual path to your project directory.
-
-### MCP Inspector (Testing)
-
-1. Install and run the MCP Inspector:
+**Linux:**
 ```bash
-npx @modelcontextprotocol/inspector
+sudo apt install maven
 ```
 
-2. Create an MCP configuration with the following settings:
-- Command: `java`
-- Arguments: 
-```json
-[
-  "-Dtwitch.channel=YOUR_CHANNEL_NAME",
-  "-Dtwitch.auth=YOUR_API_KEY",
-  "-Dtwitch.client_id=YOUR_CLIENT_ID",
-  "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
-  "-jar",
-  "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
-]
+**Verify Maven Installation:**
+Type: `mvn -version`
+You should see Maven version info.
+
+## 🎮 Step 2: Get Your Twitch Information
+
+You need 4 pieces of information from Twitch:
+
+### A. Get Your Channel Name
+This is just your Twitch username (without the @ or #). For example, if your channel is `twitch.tv/yourname`, then your channel name is `yourname`.
+
+### B. Get Your Broadcaster ID
+**Easiest Method - Use an Online Tool:**
+1. Go to [StreamWeasels Username Converter](https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/)
+2. Enter your Twitch username
+3. Click "Convert"
+4. Copy the number that appears - this is your Broadcaster ID
+
+### C. Create a Twitch Application (for Client ID)
+1. **Enable Two-Factor Authentication** on your Twitch account (required)
+2. Go to [Twitch Developer Console](https://dev.twitch.tv/console/apps/create)
+3. Log in with your Twitch account
+4. Click **"Register Your Application"**
+5. Fill out:
+   - **Name:** `My-Twitch-Bot` (or any unique name)
+   - **OAuth Redirect URLs:** `http://localhost:3000`
+   - **Category:** `Application Integration`
+6. Click **"Create"**
+7. Click **"Manage"** on your new app
+8. **Copy your Client ID** and save it
+
+### D. Get Your OAuth Token (API Key)
+**Easiest Method - Use Token Generator:**
+1. Go to [Twitch Token Generator](https://twitchapps.com/tokengen/)
+2. Paste your **Client ID** from step C
+3. Select scopes you need:
+   - `chat:read` - Read chat messages
+   - `chat:edit` - Send chat messages
+   - `channel:moderate` - Timeout/ban users
+   - `channel:manage:broadcast` - Change title/category
+   - `clips:edit` - Create clips
+   - `channel:manage:polls` - Create polls
+   - `channel:manage:predictions` - Create predictions
+4. Click **"Generate Token"**
+5. Copy the token (starts with `oauth:`) and save it
+
+**Keep these 4 items safe - you'll need them in the next step!**
+
+## 🔧 Step 3: Build the Project
+
+1. **Download this project:**
+   ```bash
+   git clone https://github.com/yourusername/twitch-mcp.git
+   cd twitch-mcp
+   ```
+
+2. **Build the project:**
+   ```bash
+   mvn clean install
+   ```
+
+   This creates the file: `target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar`
+
+## 🤖 What This Tool Does
+
+Our fork expands on TomCools' work by providing AI assistants with these powerful Twitch capabilities:
+
+### Chat & Moderation Tools:
+- **Send messages** to your Twitch chat
+- **Read recent chat** messages for context
+- **Analyze chat activity** and topics
+- **Timeout or ban users** (AI can target by username or description like "the spammer")
+
+### Stream Management Tools:
+- **Update your stream title** on the fly
+- **Change your game category**
+- **Create clips** of great moments
+
+### Interactive Features:
+- **Create polls** with custom options and duration
+- **Set up predictions** for viewer engagement
+
+### Key Improvements:
+- Advanced AI-assisted moderation
+- Comprehensive stream management
+- Interactive engagement tools
+- Better error handling and logging
+- Enhanced chat analysis capabilities
+
+## 🔗 Step 4: Connect to Your AI Tool
+
+**Important**: Only one AI tool can connect at a time. Make sure to close one before starting another.
+
+Replace the placeholder values with your actual information from Step 2:
+- `YOUR_CHANNEL_NAME`: Your Twitch username (e.g., `ninja`)
+- `YOUR_API_KEY`: Your OAuth token from Step 2D (starts with `oauth:`)
+- `YOUR_CLIENT_ID`: Your Client ID from Step 2C
+- `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
+
+### For Claude Code (Recommended)
+
+1. **Install using this command** (replace the paths with your actual info):
+   ```bash
+   claude-code mcp install --user twitch-mcp java -Dtwitch.channel=YOUR_CHANNEL_NAME -Dtwitch.auth=YOUR_API_KEY -Dtwitch.client_id=YOUR_CLIENT_ID -Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID -jar /path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
+   ```
+
+2. **Find your project path:**
+   - **Windows:** Something like `C:\Users\YourName\twitch-mcp\target\twitch-mcp-1.0.0-SNAPSHOT-runner.jar`
+   - **Mac/Linux:** Something like `/Users/YourName/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar`
+
+**Example with real values:**
+```bash
+claude-code mcp install --user twitch-mcp java -Dtwitch.channel=myusername -Dtwitch.auth=oauth:abc123def456 -Dtwitch.client_id=your_client_id_here -Dtwitch.broadcaster_id=123456789 -jar /Users/myname/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
 ```
 
-## Development
+### For Claude Desktop App
 
-The project uses:
-- Quarkus 3.17.7
-- Apache Camel Quarkus 3.17.0
-- Java 21
-- Maven for build management
+1. **Find your config file:**
+   - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+   - **Mac:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Linux:** `~/.config/Claude/claude_desktop_config.json`
 
-## License
+2. **Add this configuration** (replace with your values):
+   ```json
+   {
+     "mcpServers": {
+       "twitch-mcp": {
+         "command": "java",
+         "args": [
+           "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+           "-Dtwitch.auth=YOUR_API_KEY",
+           "-Dtwitch.client_id=YOUR_CLIENT_ID",
+           "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+           "-jar",
+           "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
+         ]
+       }
+     }
+   }
+   ```
+
+3. **Restart Claude Desktop** - the Twitch tools will appear in your chat!
+
+### For LM Studio
+
+1. **Find your LM Studio config** (usually in the LM Studio settings)
+
+2. **Add this to your `mcp.json`:**
+   ```json
+   {
+     "mcpServers": {
+       "twitch-mcp": {
+         "command": "java",
+         "args": [
+           "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+           "-Dtwitch.auth=YOUR_API_KEY",
+           "-Dtwitch.client_id=YOUR_CLIENT_ID",
+           "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+           "-jar",
+           "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
+         ],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+### For Testing (MCP Inspector)
+
+1. **Install the inspector:**
+   ```bash
+   npx @modelcontextprotocol/inspector
+   ```
+
+2. **Configure with:**
+   - **Command:** `java`
+   - **Arguments:** 
+     ```json
+     [
+       "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+       "-Dtwitch.auth=YOUR_API_KEY",
+       "-Dtwitch.client_id=YOUR_CLIENT_ID",
+       "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+       "-jar",
+       "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
+     ]
+     ```
+
+## 🎉 Step 5: Start Using Your AI Assistant!
+
+Once connected, you can ask your AI assistant to:
+
+- **"Send a message to my Twitch chat"**
+- **"What are people talking about in my chat?"**
+- **"Create a poll asking viewers what game to play next"**
+- **"Update my stream title to 'Epic Gaming Session!'"**
+- **"Timeout the user who's being toxic"**
+- **"Create a clip of that awesome moment"**
+
+## ⚙️ Optional Configuration
+
+You can add these optional settings to your Java command:
+
+- `-Dtwitch.show_connection_message=true` - Shows "Connected" message in chat when bot starts
+
+**Example with optional settings:**
+```bash
+java -Dtwitch.channel=yourname -Dtwitch.auth=oauth:yourtoken -Dtwitch.client_id=yourclientid -Dtwitch.broadcaster_id=yourid -Dtwitch.show_connection_message=true -jar target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
+```
+
+## 🛠️ Troubleshooting
+
+### Common Issues and Solutions
+
+**"Java not found" error:**
+- Make sure Java is installed and in your PATH
+- Try running `java -version` to test
+- On Windows, check your environment variables
+
+**"Maven not found" error:**
+- Make sure Maven is installed and in your PATH
+- Try running `mvn -version` to test
+- Restart your terminal after installation
+
+**"Build failed" error:**
+- Make sure you're in the correct directory (`twitch-mcp`)
+- Try `mvn clean install` again
+- Check that Java 21+ is installed
+
+**AI assistant can't see Twitch tools:**
+- Double-check all 4 values (channel name, OAuth token, client ID, broadcaster ID)
+- Make sure your OAuth token starts with `oauth:`
+- Try restarting your AI application
+- Verify only one AI tool is connected at a time
+
+**"Connection refused" or "Authentication failed":**
+- Verify your Twitch credentials are correct
+- Make sure your OAuth token has the required scopes
+- Check that your Twitch application is set up correctly
+- Ensure your broadcaster ID matches your channel
+
+**Need Help?**
+- Check the [original project](https://github.com/tomcools/twitch-mcp) for additional info
+- Review Twitch's [developer documentation](https://dev.twitch.tv/docs/)
+- Make sure your Twitch account has the necessary permissions
+
+---
+
+## 📚 For Developers
+
+### Technical Details
+- **Framework:** Quarkus 3.17.7
+- **Integration:** Apache Camel Quarkus 3.17.0  
+- **Language:** Java 21
+- **Build:** Maven
+- **Protocol:** Model Context Protocol (MCP)
+
+### Project Structure
+```
+src/main/java/be/tomcools/twitchmcp/
+├── TwitchMcp.java          # Main application
+├── api/ChatResource.java   # REST endpoints
+└── client/
+    ├── CamelRoute.java     # Message routing
+    └── TwitchClient.java   # Twitch integration
+```
+
+## 📄 License
 
 This project is open source and available under the MIT License.
