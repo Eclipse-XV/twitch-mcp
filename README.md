@@ -4,15 +4,32 @@ This project is a fork and expansion of [TomCools' Twitch MCP Server](https://gi
 
 ## Project Overview
 
-The server uses Quarkus and Apache Camel to create a bridge between Twitch chat and the MCP protocol, enabling AI assistants to:
-- Read messages from your Twitch chat
-- Send messages to your Twitch chat
-- Interact with your channel in real-time
+The server uses Quarkus and Apache Camel to create a bridge between Twitch chat and the MCP protocol, enabling AI assistants to interact with your Twitch channel through the following tools:
+
+### Available Tools
+
+**Chat & Moderation:**
+- `sendMessageToChat` - Send messages to your Twitch chat
+- `getRecentChatLog` - Get the last 20 chat messages for moderation context
+- `analyzeChat` - Analyze recent chat messages and provide topic/activity summary
+- `timeoutUser` - Timeout users in chat (supports username or descriptive targeting)
+- `banUser` - Ban users from chat (supports username or descriptive targeting)
+
+**Stream Management:**
+- `updateStreamTitle` - Update your stream title
+- `updateStreamCategory` - Update the game category of your stream
+- `createTwitchClip` - Create a clip of the current stream
+
+**Interactive Features:**
+- `createTwitchPoll` - Create polls with custom choices and duration
+- `createTwitchPrediction` - Create predictions with custom outcomes and duration
 
 Our fork expands on TomCools' work by:
-- Adding support for more Twitch chat commands and interactions
+- Adding comprehensive stream management tools (title, category updates)
+- Implementing advanced moderation features with AI-assisted targeting
+- Adding interactive engagement tools (polls, predictions, clips)
+- Providing chat analysis and monitoring capabilities
 - Improving error handling and logging
-- Adding additional configuration options
 - Enhancing the MCP protocol implementation
 
 ## Prerequisites
