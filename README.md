@@ -71,7 +71,7 @@ You should see Maven version info.
 
 ## 🎮 Step 2: Get Your Twitch Information
 
-You need 4 pieces of information from Twitch:
+You need 4 pieces of information from Twitch - but we can get most of them from one easy tool!
 
 ### A. Get Your Channel Name
 This is just your Twitch username (without the @ or #). For example, if your channel is `twitch.tv/yourname`, then your channel name is `yourname`.
@@ -83,35 +83,28 @@ This is just your Twitch username (without the @ or #). For example, if your cha
 3. Click "Convert"
 4. Copy the number that appears - this is your Broadcaster ID
 
-### C. Create a Twitch Application (for Client ID)
-1. **Enable Two-Factor Authentication** on your Twitch account (required)
-2. Go to [Twitch Developer Console](https://dev.twitch.tv/console/apps/create)
-3. Log in with your Twitch account
-4. Click **"Register Your Application"**
-5. Fill out:
-   - **Name:** `My-Twitch-Bot` (or any unique name)
-   - **OAuth Redirect URLs:** `http://localhost:3000`
-   - **Category:** `Application Integration`
-6. Click **"Create"**
-7. Click **"Manage"** on your new app
-8. **Copy your Client ID** and save it
-
-### D. Get Your OAuth Token (API Key)
-**Easiest Method - Use Token Generator:**
-1. Go to [Twitch Token Generator](https://twitchapps.com/tokengen/)
-2. Paste your **Client ID** from step C
-3. Select scopes you need:
-   - `chat:read` - Read chat messages
-   - `chat:edit` - Send chat messages
-   - `channel:moderate` - Timeout/ban users
-   - `channel:manage:broadcast` - Change title/category
-   - `clips:edit` - Create clips
-   - `channel:manage:polls` - Create polls
-   - `channel:manage:predictions` - Create predictions
+### C. Get Your Client ID and API Key (Both from One Tool!)
+**Super Easy Method - Get Both at Once:**
+1. Go to [Twitch Token Generator](https://twitchtokengenerator.com/)
+2. Click **"Generate Token"**
+3. Select the scopes you need:
+   - ✅ `chat:read` - Read chat messages
+   - ✅ `chat:edit` - Send chat messages
+   - ✅ `channel:moderate` - Timeout/ban users
+   - ✅ `channel:manage:broadcast` - Change title/category
+   - ✅ `clips:edit` - Create clips
+   - ✅ `channel:manage:polls` - Create polls
+   - ✅ `channel:manage:predictions` - Create predictions
 4. Click **"Generate Token"**
-5. Copy the token (starts with `oauth:`) and save it
+5. **Copy both values:**
+   - **Access Token** (this is your Twitch API key - save this!)
+   - **Client ID** - also shown on the same page
 
 **Keep these 4 items safe - you'll need them in the next step!**
+- Channel Name (your username)
+- Broadcaster ID (from StreamWeasels)
+- Client ID (from Token Generator)
+- API Key (the "Access Token" from Token Generator)
 
 ## 🔧 Step 3: Build the Project
 
@@ -160,8 +153,8 @@ Our fork expands on TomCools' work by providing AI assistants with these powerfu
 
 Replace the placeholder values with your actual information from Step 2:
 - `YOUR_CHANNEL_NAME`: Your Twitch username (e.g., `ninja`)
-- `YOUR_API_KEY`: Your OAuth token from Step 2D (starts with `oauth:`)
-- `YOUR_CLIENT_ID`: Your Client ID from Step 2C
+- `YOUR_API_KEY`: Your Twitch API key (the "Access Token" from Step 2C)
+- `YOUR_CLIENT_ID`: Your Client ID from Step 2C  
 - `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
 
 ### For LM Studio (Recommended #1 - Free & Runs Locally)
@@ -278,7 +271,7 @@ You can add these optional settings to your Java command:
 
 **Example with optional settings:**
 ```bash
-java -Dtwitch.channel=yourname -Dtwitch.auth=oauth:yourtoken -Dtwitch.client_id=yourclientid -Dtwitch.broadcaster_id=yourid -Dtwitch.show_connection_message=true -jar target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
+java -Dtwitch.channel=yourname -Dtwitch.auth=your_api_key_here -Dtwitch.client_id=yourclientid -Dtwitch.broadcaster_id=yourid -Dtwitch.show_connection_message=true -jar target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
 ```
 
 ## 🛠️ Troubleshooting
@@ -301,15 +294,15 @@ java -Dtwitch.channel=yourname -Dtwitch.auth=oauth:yourtoken -Dtwitch.client_id=
 - Check that Java 21+ is installed
 
 **AI assistant can't see Twitch tools:**
-- Double-check all 4 values (channel name, OAuth token, client ID, broadcaster ID)
-- Make sure your OAuth token starts with `oauth:`
+- Double-check all 4 values (channel name, API key, client ID, broadcaster ID)
+- Make sure your API key is the "Access Token" from twitchtokengenerator.com
 - Try restarting your AI application
 - Verify only one AI tool is connected at a time
 
 **"Connection refused" or "Authentication failed":**
 - Verify your Twitch credentials are correct
-- Make sure your OAuth token has the required scopes
-- Check that your Twitch application is set up correctly
+- Make sure your API key has the required scopes (from twitchtokengenerator.com)
+- Double-check that your API key and Client ID are from the same token generation
 - Ensure your broadcaster ID matches your channel
 
 **Need Help?**
