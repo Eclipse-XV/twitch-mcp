@@ -164,21 +164,50 @@ Replace the placeholder values with your actual information from Step 2:
 - `YOUR_CLIENT_ID`: Your Client ID from Step 2C
 - `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
 
-### For Claude Code (Recommended)
+### For LM Studio (Recommended #1 - Free & Runs Locally)
 
-1. **Install using this command** (replace the paths with your actual info):
+**Best option if you have a decent PC.** LM Studio is completely free, runs locally, and gives you full control over your AI models.
+
+1. **Download LM Studio** from [lmstudio.ai](https://lmstudio.ai/)
+2. **Find MCP Settings** in LM Studio → Settings → Developer tab → MCP Settings
+3. **Add this configuration:**
+   ```json
+   {
+     "mcpServers": {
+       "twitch-mcp": {
+         "command": "java",
+         "args": [
+           "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+           "-Dtwitch.auth=YOUR_API_KEY",
+           "-Dtwitch.client_id=YOUR_CLIENT_ID",
+           "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+           "-jar",
+           "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
+         ],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+### For Open Router (Alternative #2 - Requires $10 Credit Hold)
+
+**Good cloud option.** Open Router gives free access to various AI models but requires a $10 credit hold (not spent, just held on your account).
+
+1. **Sign up at [OpenRouter.ai](https://openrouter.ai/)**
+2. **Add $10 credit hold** to your account (required but not spent)
+3. **Get your API key** from the dashboard
+4. **Use with MCP-compatible clients** like Continue.dev or other tools
+5. **Configure using the same Java command structure**
+
+### For Claude Code
+
+*The project creator uses Claude Code for development but recommends the free alternatives above for most users.*
+
+1. **Install command:**
    ```bash
    claude-code mcp install --user twitch-mcp java -Dtwitch.channel=YOUR_CHANNEL_NAME -Dtwitch.auth=YOUR_API_KEY -Dtwitch.client_id=YOUR_CLIENT_ID -Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID -jar /path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
    ```
-
-2. **Find your project path:**
-   - **Windows:** Something like `C:\Users\YourName\twitch-mcp\target\twitch-mcp-1.0.0-SNAPSHOT-runner.jar`
-   - **Mac/Linux:** Something like `/Users/YourName/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar`
-
-**Example with real values:**
-```bash
-claude-code mcp install --user twitch-mcp java -Dtwitch.channel=myusername -Dtwitch.auth=oauth:abc123def456 -Dtwitch.client_id=your_client_id_here -Dtwitch.broadcaster_id=123456789 -jar /Users/myname/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
-```
 
 ### For Claude Desktop App
 
@@ -208,29 +237,6 @@ claude-code mcp install --user twitch-mcp java -Dtwitch.channel=myusername -Dtwi
 
 3. **Restart Claude Desktop** - the Twitch tools will appear in your chat!
 
-### For LM Studio
-
-1. **Find your LM Studio config** (usually in the LM Studio settings)
-
-2. **Add this to your `mcp.json`:**
-   ```json
-   {
-     "mcpServers": {
-       "twitch-mcp": {
-         "command": "java",
-         "args": [
-           "-Dtwitch.channel=YOUR_CHANNEL_NAME",
-           "-Dtwitch.auth=YOUR_API_KEY",
-           "-Dtwitch.client_id=YOUR_CLIENT_ID",
-           "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
-           "-jar",
-           "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
-         ],
-         "env": {}
-       }
-     }
-   }
-   ```
 
 ### For Testing (MCP Inspector)
 
