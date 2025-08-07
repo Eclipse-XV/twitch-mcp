@@ -47,6 +47,8 @@ mvn clean install
 
 ## Running the MCP Server
 
+**Important Note**: Only one client can connect to the MCP server at a time. You cannot have multiple tools (e.g., Claude Code and LM Studio) connected to the same MCP server instance simultaneously. If you need to switch between different clients, ensure the previous connection is closed before starting a new one.
+
 ### Using MCP Inspector
 
 1. Install and run the MCP Inspector:
@@ -91,6 +93,49 @@ Add the following configuration to your `claude_desktop_config.json`:
 ```
 
 After adding the configuration and restarting Claude Desktop, the Twitch MCP tool will be available in your Claude UI.
+
+### Using Claude Code
+
+The MCP server is also compatible with Claude Code. After building the project, you can configure it using user scope:
+
+1. First, build the project to create the JAR file:
+   ```bash
+   mvn clean install
+   ```
+
+2. Configure the MCP server with user scope by running:
+   ```bash
+   claude-code mcp install --user twitch-mcp java -Dtwitch.channel=YOUR_CHANNEL_NAME -Dtwitch.auth=YOUR_API_KEY -Dtwitch.client_id=YOUR_CLIENT_ID -Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID -jar path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
+   ```
+
+   Replace `path/to/your/twitch-mcp` with the actual path to your project directory.
+
+3. The MCP server will then be available in your Claude Code sessions.
+
+### Using LM Studio
+
+For LM Studio integration, add the following to your `mcp.json` configuration file:
+
+```json
+{
+  "mcpServers": {
+    "twitch-mcp": {
+      "command": "java",
+      "args": [
+        "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+        "-Dtwitch.auth=YOUR_API_KEY",
+        "-Dtwitch.client_id=YOUR_CLIENT_ID",
+        "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+        "-jar",
+        "path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+Replace `path/to/your/twitch-mcp` with the actual path to your project directory.
 
 ## Development
 
