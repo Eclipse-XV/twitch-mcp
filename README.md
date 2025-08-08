@@ -2,15 +2,24 @@
 
 This project is a fork and expansion of [TomCools' Twitch MCP Server](https://github.com/tomcools/twitch-mcp), which implements a Model Context Protocol (MCP) server that integrates with Twitch chat, allowing AI assistants like Claude to interact with your Twitch channel. The original project was inspired by [Max Rydahl Andersen's blog post](https://quarkus.io/blog/mcp-server/) about MCP servers and combines that knowledge with Twitch chat integration.
 
+## 📦 Easy Installation Option
+
+Want to get started quickly without installing Java or Maven? You can now install and run the Twitch MCP Server directly from npm:
+
+```bash
+npx twitch-mcp-server@1.0.1 --channel your_channel --auth oauth:your_token --client-id your_client_id --broadcaster-id your_broadcaster_id
+```
+
 ## 🚀 Quick Start Guide
 
 **Complete these 5 simple steps to get your Twitch AI assistant running:**
 
-1. **Install Java and Maven** (see detailed instructions below)
-2. **Get your Twitch information** (broadcaster ID, API key, etc.)
-3. **Download and build this project**
-4. **Connect to your AI tool** (Qwen Code, LM Studio, Claude, etc.)
-5. **Start chatting with AI about your Twitch stream!**
+1. **Get your Twitch information** (broadcaster ID, API key, etc.)
+2. **Install the Twitch MCP Server** (Choose one option below)
+   - **Option A (Easiest):** Use npm: `npx twitch-mcp-server@1.0.1` (no Java/Maven needed)
+   - **Option B (Traditional):** Install Java and Maven, then build this project
+3. **Connect to your AI tool** (Qwen Code, LM Studio, Claude, etc.)
+4. **Start chatting with AI about your Twitch stream!**
 
 ## 💻 Step 1: Install Java and Maven (For Beginners)
 
@@ -106,7 +115,25 @@ This is just your Twitch username (without the @ or #). For example, if your cha
 - Client ID (from Token Generator)
 - API Key (the "Access Token" from Token Generator)
 
-## 🔧 Step 3: Build the Project
+## 🔧 Step 3: Install the Twitch MCP Server
+
+You can install the Twitch MCP Server in two ways:
+
+### Option A: Using npm (Easiest - No Java/Maven Required)
+
+```bash
+npx twitch-mcp-server@1.0.1 --channel your_channel --auth oauth:your_token --client-id your_client_id --broadcaster-id your_broadcaster_id
+```
+
+This is the easiest option as it:
+- Automatically downloads and runs the server
+- Doesn't require Java or Maven installation
+- Works on Windows, Mac, and Linux
+- Automatically handles dependencies
+
+### Option B: Traditional Build (Advanced Users)
+
+If you prefer to build from source:
 
 1. **Download this project:**
    ```bash
@@ -151,46 +178,76 @@ Our fork expands on TomCools' work by providing AI assistants with these powerfu
 
 **Important**: Only one AI tool can connect at a time. Make sure to close one before starting another.
 
-Replace the placeholder values with your actual information from Step 2:
+Replace the placeholder values with your actual information:
 - `YOUR_CHANNEL_NAME`: Your Twitch username (e.g., `ninja`)
 - `YOUR_API_KEY`: Your Twitch API key (the "Access Token" from Step 2C)
 - `YOUR_CLIENT_ID`: Your Client ID from Step 2C  
 - `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
 
-### For Qwen Code (Recommended #1 - Free with API Limit)
+### Option A: Using npm (Recommended - Easiest)
 
-**Best option for users who want to run multiple applications simultaneously.** Qwen Code uses the Qwen OAuth API which provides 2000 free requests, and importantly doesn't require substantial memory usage like other local AI solutions, making it ideal for gaming PCs running multiple applications.
+If you installed using npm, you can connect your AI tool directly to the npx command:
 
-1. **Download Qwen Code** from [qwen-code.com](https://www.qwen-code.com/) (or appropriate source)
-2. **Find the settings file:**
-   - **Windows:** `C:/Users/[Your Username]/.qwen/settings.json`
-   - **Mac:** `~/.qwen/settings.json`
-   - **Linux:** `~/.qwen/settings.json`
-3. **Add this configuration to the settings.json file:**
+1. In your AI tool's MCP settings, use this configuration:
    ```json
    {
      "mcpServers": {
        "twitch-mcp": {
-         "command": "java",
+         "command": "npx",
          "args": [
-           "-Dtwitch.channel=YOUR_CHANNEL_NAME",
-           "-Dtwitch.auth=YOUR_API_KEY",
-           "-Dtwitch.client_id=YOUR_CLIENT_ID",
-           "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
-           "-jar",
-           "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
-         ],
-         "env": {}
+           "twitch-mcp-server@1.0.1",
+           "--channel", "YOUR_CHANNEL_NAME",
+           "--auth", "YOUR_API_KEY",
+           "--client-id", "YOUR_CLIENT_ID",
+           "--broadcaster-id", "YOUR_BROADCASTER_ID"
+         ]
        }
      }
    }
    ```
-4. **Replace the placeholder values** with your actual information from Step 2:
-   - `YOUR_CHANNEL_NAME`: Your Twitch username (e.g., `ninja`)
-   - `YOUR_API_KEY`: Your Twitch API key (the "Access Token" from Step 2C)
-   - `YOUR_CLIENT_ID`: Your Client ID from Step 2C  
-   - `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
-   - `/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar`: The full path to your built JAR file
+
+### Option B: Traditional Java Approach
+
+### For Qwen Code (Recommended #1 - Free with API Limit)
+
+**Best option for users who want to run multiple applications simultaneously.** Qwen Code uses the Qwen OAuth API which provides 2000 free requests, and importantly doesn't require substantial memory usage like other local AI solutions, making it ideal for gaming PCs running multiple applications.
+
+**Installation Options:**
+
+1. **Using npm (Easiest):**
+   - Simply connect Qwen Code to the npm package using the configuration shown in the npm section above
+
+2. **Traditional Java Setup:**
+   1. **Download Qwen Code** from [qwen-code.com](https://www.qwen-code.com/) (or appropriate source)
+   2. **Find the settings file:**
+      - **Windows:** `C:/Users/[Your Username]/.qwen/settings.json`
+      - **Mac:** `~/.qwen/settings.json`
+      - **Linux:** `~/.qwen/settings.json`
+   3. **Add this configuration to the settings.json file:**
+      ```json
+      {
+        "mcpServers": {
+          "twitch-mcp": {
+            "command": "java",
+            "args": [
+              "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+              "-Dtwitch.auth=YOUR_API_KEY",
+              "-Dtwitch.client_id=YOUR_CLIENT_ID",
+              "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+              "-jar",
+              "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
+            ],
+            "env": {}
+          }
+        }
+      }
+      ```
+   4. **Replace the placeholder values** with your actual information from Step 2:
+      - `YOUR_CHANNEL_NAME`: Your Twitch username (e.g., `ninja`)
+      - `YOUR_API_KEY`: Your Twitch API key (the "Access Token" from Step 2C)
+      - `YOUR_CLIENT_ID`: Your Client ID from Step 2C  
+      - `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
+      - `/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar`: The full path to your built JAR file
 
 ### For LM Studio (Alternative - Free & Runs Locally, but Memory Intensive)
 
@@ -343,6 +400,90 @@ java -Dtwitch.channel=yourname -Dtwitch.auth=your_api_key_here -Dtwitch.client_i
 - Check the [original project](https://github.com/tomcools/twitch-mcp) for additional info
 - Review Twitch's [developer documentation](https://dev.twitch.tv/docs/)
 - Make sure your Twitch account has the necessary permissions
+
+## 📦 Easy Installation with npm (Recommended)
+
+For an even easier setup, you can now install and run the Twitch MCP Server directly from npm:
+
+```bash
+npx twitch-mcp-server@1.0.1 --channel your_channel --auth oauth:your_token --client-id your_client_id --broadcaster-id your_broadcaster_id
+```
+
+This eliminates the need to:
+- Clone the repository
+- Install Maven
+- Build the Java project
+- Manually manage Java dependencies
+
+### Installation Options
+
+1. **Run directly with npx** (recommended):
+   ```bash
+   npx twitch-mcp-server@1.0.1 --channel your_channel --auth oauth:your_token --client-id your_client_id --broadcaster-id your_broadcaster_id
+   ```
+
+2. **Install globally**:
+   ```bash
+   npm install -g twitch-mcp-server@1.0.1
+   twitch-mcp-server --channel your_channel --auth oauth:your_token --client-id your_client_id --broadcaster-id your_broadcaster_id
+   ```
+
+### Configuration
+
+You can also configure using environment variables:
+```bash
+export TWITCH_CHANNEL=your_channel
+export TWITCH_AUTH=oauth:your_token
+export TWITCH_CLIENT_ID=your_client_id
+export TWITCH_BROADCASTER_ID=your_broadcaster_id
+
+npx twitch-mcp-server@1.0.1
+```
+
+### Connecting with AI Tools
+
+Once running, connect with your preferred AI tool:
+
+#### For Qwen Code (Recommended)
+1. Open Qwen Code settings
+2. Add this MCP configuration:
+   ```json
+   {
+     "mcpServers": {
+       "twitch-mcp": {
+         "command": "npx",
+         "args": [
+           "twitch-mcp-server@1.0.1",
+           "--channel", "YOUR_CHANNEL",
+           "--auth", "oauth:YOUR_TOKEN",
+           "--client-id", "YOUR_CLIENT_ID",
+           "--broadcaster-id", "YOUR_BROADCASTER_ID"
+         ]
+       }
+     }
+   }
+   ```
+
+#### For LM Studio
+1. Open LM Studio
+2. Go to Settings → Developer → MCP Settings
+3. Add this configuration:
+   ```json
+   {
+     "mcpServers": {
+       "twitch-mcp": {
+         "command": "npx",
+         "args": [
+           "twitch-mcp-server@1.0.1",
+           "--channel", "YOUR_CHANNEL",
+           "--auth", "oauth:YOUR_TOKEN",
+           "--client-id", "YOUR_CLIENT_ID",
+           "--broadcaster-id", "YOUR_BROADCASTER_ID"
+         ]
+       }
+     }
+   }
+   ```
 
 ---
 
