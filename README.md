@@ -9,7 +9,7 @@ This project is a fork and expansion of [TomCools' Twitch MCP Server](https://gi
 1. **Install Java and Maven** (see detailed instructions below)
 2. **Get your Twitch information** (broadcaster ID, API key, etc.)
 3. **Download and build this project**
-4. **Connect to your AI tool** (Claude, LM Studio, etc.)
+4. **Connect to your AI tool** (Qwen Code, LM Studio, Claude, etc.)
 5. **Start chatting with AI about your Twitch stream!**
 
 ## 💻 Step 1: Install Java and Maven (For Beginners)
@@ -157,9 +157,44 @@ Replace the placeholder values with your actual information from Step 2:
 - `YOUR_CLIENT_ID`: Your Client ID from Step 2C  
 - `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
 
-### For LM Studio (Recommended #1 - Free & Runs Locally)
+### For Qwen Code (Recommended #1 - Free with API Limit)
 
-**Best option if you have a decent PC.** LM Studio is completely free, runs locally, and gives you full control over your AI models.
+**Best option for users who want to run multiple applications simultaneously.** Qwen Code uses the Qwen OAuth API which provides 2000 free requests, and importantly doesn't require substantial memory usage like other local AI solutions, making it ideal for gaming PCs running multiple applications.
+
+1. **Download Qwen Code** from [qwen-code.com](https://www.qwen-code.com/) (or appropriate source)
+2. **Find the settings file:**
+   - **Windows:** `C:/Users/[Your Username]/.qwen/settings.json`
+   - **Mac:** `~/.qwen/settings.json`
+   - **Linux:** `~/.qwen/settings.json`
+3. **Add this configuration to the settings.json file:**
+   ```json
+   {
+     "mcpServers": {
+       "twitch-mcp": {
+         "command": "java",
+         "args": [
+           "-Dtwitch.channel=YOUR_CHANNEL_NAME",
+           "-Dtwitch.auth=YOUR_API_KEY",
+           "-Dtwitch.client_id=YOUR_CLIENT_ID",
+           "-Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID",
+           "-jar",
+           "/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar"
+         ],
+         "env": {}
+       }
+     }
+   }
+   ```
+4. **Replace the placeholder values** with your actual information from Step 2:
+   - `YOUR_CHANNEL_NAME`: Your Twitch username (e.g., `ninja`)
+   - `YOUR_API_KEY`: Your Twitch API key (the "Access Token" from Step 2C)
+   - `YOUR_CLIENT_ID`: Your Client ID from Step 2C  
+   - `YOUR_BROADCASTER_ID`: Your broadcaster ID from Step 2B
+   - `/path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar`: The full path to your built JAR file
+
+### For LM Studio (Alternative - Free & Runs Locally, but Memory Intensive)
+
+**Good local option, but not recommended if you're running many games or applications.** LM Studio is completely free and runs locally, giving you full control over your AI models, but it requires substantial memory which can be prohibitive when playing many games on the same PC.
 
 1. **Download LM Studio** from [lmstudio.ai](https://lmstudio.ai/)
 2. **Find MCP Settings** in LM Studio → Settings → Developer tab → MCP Settings
@@ -181,25 +216,6 @@ Replace the placeholder values with your actual information from Step 2:
        }
      }
    }
-   ```
-
-### For Open Router (Alternative #2 - Requires $10 Credit Hold)
-
-**Good cloud option.** Open Router gives free access to various AI models but requires a $10 credit hold (not spent, just held on your account).
-
-1. **Sign up at [OpenRouter.ai](https://openrouter.ai/)**
-2. **Add $10 credit hold** to your account (required but not spent)
-3. **Get your API key** from the dashboard
-4. **Use with MCP-compatible clients** like Continue.dev or other tools
-5. **Configure using the same Java command structure**
-
-### For Claude Code
-
-*The project creator uses Claude Code for development but recommends the free alternatives above for most users.*
-
-1. **Install command:**
-   ```bash
-   claude-code mcp install --user twitch-mcp java -Dtwitch.channel=YOUR_CHANNEL_NAME -Dtwitch.auth=YOUR_API_KEY -Dtwitch.client_id=YOUR_CLIENT_ID -Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID -jar /path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
    ```
 
 ### For Claude Desktop App
@@ -230,6 +246,24 @@ Replace the placeholder values with your actual information from Step 2:
 
 3. **Restart Claude Desktop** - the Twitch tools will appear in your chat!
 
+### For Open Router (Cloud Option - Requires $10 Credit Hold)
+
+**Good cloud option.** Open Router gives free access to various AI models but requires a $10 credit hold (not spent, just held on your account).
+
+1. **Sign up at [OpenRouter.ai](https://openrouter.ai/)**
+2. **Add $10 credit hold** to your account (required but not spent)
+3. **Get your API key** from the dashboard
+4. **Use with MCP-compatible clients** like Continue.dev or other tools
+5. **Configure using the same Java command structure**
+
+### For Claude Code
+
+*The project creator uses Claude Code for development but recommends the free alternatives above for most users.*
+
+1. **Install command:**
+   ```bash
+   claude-code mcp install --user twitch-mcp java -Dtwitch.channel=YOUR_CHANNEL_NAME -Dtwitch.auth=YOUR_API_KEY -Dtwitch.client_id=YOUR_CLIENT_ID -Dtwitch.broadcaster_id=YOUR_BROADCASTER_ID -jar /path/to/your/twitch-mcp/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar
+   ```
 
 ### For Testing (MCP Inspector)
 
