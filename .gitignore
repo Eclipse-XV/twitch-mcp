@@ -10,7 +10,12 @@ release.properties
 .project
 .classpath
 .settings/
+# Generic build output
 bin/
+
+# Allow CLI bin for npm package
+!twitch-mcp-npm/bin/
+!twitch-mcp-npm/bin/twitch-mcp.js
 
 # IntelliJ
 .idea
