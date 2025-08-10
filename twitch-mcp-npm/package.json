@@ -1,10 +1,10 @@
 {
   "name": "twitch-mcp-server",
-  "version": "1.1.0",
+  "version": "1.1.3",
   "description": "Twitch MCP Server - AI integration for Twitch chat",
   "main": "index.js",
   "bin": {
-    "twitch-mcp-server": "./bin/twitch-mcp.js"
+    "twitch-mcp-server": "bin/twitch-mcp.js"
   },
   "scripts": {
     "start": "node ./bin/twitch-mcp.js",

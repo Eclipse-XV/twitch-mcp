@@ -20,11 +20,7 @@ AI-powered tools for Twitch streamers, exposed via the Model Context Protocol (M
   }
   ```
 
-- Launch via npx (manual test):
-  ```bash
-  npx -y twitch-mcp-server@latest --config \
-    "C:/Users/<you>/AppData/Roaming/twitch-mcp/config.json"
-  ```
+Note: You do not need to start the server yourself when using Qwen Code. Qwen will launch it using the configuration below.
 
 ### Qwen Code configuration (recommended)
 Add to your Qwen settings (Windows path shown):
