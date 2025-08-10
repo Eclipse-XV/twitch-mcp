@@ -36,9 +36,13 @@ COPY --from=quarkus-build /code/target/*-runner /app
 EXPOSE 8080
 ENTRYPOINT ["/app"]
 
-# NPM mode (inspectable)
+# NPM mode (inspectable) - Recommended for Glama.ai
 FROM node:20 AS npm
 WORKDIR /app
 COPY --from=npm-build /app ./
+# Copy JAR file for the NPM mode
+COPY twitch-mcp-npm/lib/twitch-mcp-runner.jar ./lib/
 EXPOSE 8080
-CMD ["node", "index.js"]  # <-- adjust if your NPM entrypoint is different
+# Use the proper entrypoint for the NPM package
+ENTRYPOINT ["node", "bin/twitch-mcp.js"]
+CMD []

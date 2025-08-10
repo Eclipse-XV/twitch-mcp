@@ -61,6 +61,24 @@ The project includes a multi-stage Dockerfile that supports both Quarkus native 
 
 The NPM mode is particularly useful for inspection and debugging, as it runs the server in a Node.js environment which is more familiar to many developers and allows for easier debugging.
 
+### Glama.ai Deployment
+
+For deployment on Glama.ai, the NPM mode is recommended as it provides better inspectability:
+
+1. Build the Docker image in NPM mode:
+   ```bash
+   docker build --build-arg MODE=npm -t twitch-mcp-server-npm .
+   ```
+
+2. Push to your container registry (Docker Hub, etc.)
+
+3. Configure your Glama.ai deployment to use the NPM mode image, which will:
+   - Provide better debugging capabilities
+   - Allow inspection of the Node.js layer
+   - Maintain all Twitch MCP functionality through the Java backend
+
+Note: The NPM mode acts as a wrapper that manages the Java process, making it easier to inspect and debug while maintaining full functionality.
+
 ### NPM Package
 
 The project also includes an NPM package for easy distribution. The package bundles the runner and is the recommended path for normal users.
