@@ -61,3 +61,4 @@ Notes
 
 ### Developers
 - Power users can build from source with Maven/Quarkus, but normal users do not need to clone or build. The npm package bundles the runner and is the recommended path.
+- For containerized deployments, see [README_DEVELOPERS.md](README_DEVELOPERS.md) for Docker instructions.

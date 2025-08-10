@@ -40,6 +40,22 @@ The project is built with Quarkus. You can use standard Maven commands for devel
   ./mvnw package -Pnative
   ```
 
+### Docker
+
+The project includes a Dockerfile for building and running the server in a containerized environment:
+
+- Build the Docker image:
+  ```bash
+  docker build -t twitch-mcp-server .
+  ```
+
+- Run the Docker container:
+  ```bash
+  docker run -p 8080:8080 twitch-mcp-server
+  ```
+
+For debugging and inspection capabilities, the Docker image exposes both the main port (8080) and a debug port (5005).
+
 ### NPM Package
 
 The project also includes an NPM package for easy distribution. The package bundles the runner and is the recommended path for normal users.

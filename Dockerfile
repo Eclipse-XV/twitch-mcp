@@ -7,10 +7,14 @@ USER quarkus
 WORKDIR /code
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 COPY --chown=quarkus:quarkus src /code/src
-RUN ./mvnw package -Pnative
+# Build with debug symbols for inspection capabilities
+RUN ./mvnw package -Pnative -Dquarkus.native.debug.enabled=true
 
 # Stage 2: Create the minimal runtime image
-FROM scratch
+# Using distroless instead of scratch to provide inspection capabilities
+FROM gcr.io/distroless/base-debian11
 COPY --from=build /code/target/*-runner /app
-EXPOSE 8080
-ENTRYPOINT ["/app"] 
+# Expose main port and debug port
+EXPOSE 8080 5005
+# Enable debugging and inspection
+ENTRYPOINT ["/app", "-Dquarkus.http.host=0.0.0.0", "-Djava.util.logging.manager=org.jboss.logmanager.LogManager"] 
