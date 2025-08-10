@@ -42,11 +42,16 @@ The project is built with Quarkus. You can use standard Maven commands for devel
 
 ### Docker
 
-The project includes a Dockerfile for building and running the server in a containerized environment:
+The project includes a multi-stage Dockerfile that supports both Quarkus native and NPM modes:
 
-- Build the Docker image:
+- Build the Docker image (Quarkus native mode by default):
   ```bash
   docker build -t twitch-mcp-server .
+  ```
+
+- Build the Docker image in NPM mode (inspectable):
+  ```bash
+  docker build --build-arg MODE=npm -t twitch-mcp-server-npm .
   ```
 
 - Run the Docker container:
@@ -54,7 +59,7 @@ The project includes a Dockerfile for building and running the server in a conta
   docker run -p 8080:8080 twitch-mcp-server
   ```
 
-For debugging and inspection capabilities, the Docker image exposes both the main port (8080) and a debug port (5005).
+The NPM mode is particularly useful for inspection and debugging, as it runs the server in a Node.js environment which is more familiar to many developers and allows for easier debugging.
 
 ### NPM Package
 
