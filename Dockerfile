@@ -1,5 +1,9 @@
-# Stage 1: Build the native executable
-FROM quay.io/quarkus/ubi-quarkus-mandrel-builder:22.3-java21 AS build
+# syntax=docker/dockerfile:1
+
+# =========================
+# Stage 1: Quarkus Native Build
+# =========================
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder:22.3-java21 AS quarkus-build
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
@@ -10,11 +14,31 @@ COPY --chown=quarkus:quarkus src /code/src
 # Build with debug symbols for inspection capabilities
 RUN ./mvnw package -Pnative -Dquarkus.native.debug.enabled=true
 
-# Stage 2: Create the minimal runtime image
-# Using distroless instead of scratch to provide inspection capabilities
-FROM gcr.io/distroless/base-debian11
-COPY --from=build /code/target/*-runner /app
-# Expose main port and debug port
-EXPOSE 8080 5005
-# Enable debugging and inspection
-ENTRYPOINT ["/app", "-Dquarkus.http.host=0.0.0.0", "-Djava.util.logging.manager=org.jboss.logmanager.LogManager"] 
+# =========================
+# Stage 2: NPM Build
+# =========================
+FROM node:20 AS npm-build
+WORKDIR /app
+COPY twitch-mcp-npm/package*.json ./
+RUN npm install
+COPY twitch-mcp-npm/ ./
+RUN npm run build
+
+# =========================
+# Stage 3: Runtime (select mode)
+# =========================
+ARG MODE=quarkus
+FROM ${MODE:-quarkus} AS final
+
+# Quarkus mode (smallest)
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10 AS quarkus
+COPY --from=quarkus-build /code/target/*-runner /app
+EXPOSE 8080
+ENTRYPOINT ["/app"]
+
+# NPM mode (inspectable)
+FROM node:20 AS npm
+WORKDIR /app
+COPY --from=npm-build /app ./
+EXPOSE 8080
+CMD ["node", "index.js"]  # <-- adjust if your NPM entrypoint is different
