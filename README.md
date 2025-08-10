@@ -1,5 +1,9 @@
 ### Twitch MCP Server
 
+<a href="https://glama.ai/mcp/servers/@Eclipse-XV/twitch-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@Eclipse-XV/twitch-mcp/badge" />
+</a>
+
 AI-powered tools for Twitch streamers, exposed via the Model Context Protocol (MCP). Connect your coding/chat assistants (Qwen Code, LM Studio, Claude, etc.) to your Twitch chat for moderation, stream management, and engagement.
 
 ### Quick start (no cloning required)
