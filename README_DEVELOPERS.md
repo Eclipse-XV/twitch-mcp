@@ -42,16 +42,11 @@ The project is built with Quarkus. You can use standard Maven commands for devel
 
 ### Docker
 
-The project includes a multi-stage Dockerfile that supports both Quarkus native and NPM modes:
+The project includes a multi-stage Dockerfile that builds the application using Maven and creates a minimal runtime image:
 
-- Build the Docker image (Quarkus native mode by default):
+- Build the Docker image:
   ```bash
   docker build -t twitch-mcp-server .
-  ```
-
-- Build the Docker image in NPM mode (inspectable):
-  ```bash
-  docker build --build-arg MODE=npm -t twitch-mcp-server-npm .
   ```
 
 - Run the Docker container:
@@ -59,25 +54,28 @@ The project includes a multi-stage Dockerfile that supports both Quarkus native 
   docker run -p 8080:8080 twitch-mcp-server
   ```
 
-The NPM mode is particularly useful for inspection and debugging, as it runs the server in a Node.js environment which is more familiar to many developers and allows for easier debugging.
+The Dockerfile has been updated to use Maven 3.9.9 with Eclipse Temurin 21 for building the application, which provides the latest features and security updates. The runtime image uses Eclipse Temurin 21 JRE on Ubuntu Jammy for a lightweight and secure deployment.
+
+The Docker image includes:
+- A non-root user for security
+- Proper file ownership with --chown
+- Health checks for container orchestration
+- Multi-stage build for smaller image size
 
 ### Glama.ai Deployment
 
-For deployment on Glama.ai, the NPM mode is recommended as it provides better inspectability:
+For deployment on Glama.ai, you can use the standard Docker image:
 
-1. Build the Docker image in NPM mode:
+1. Build the Docker image:
    ```bash
-   docker build --build-arg MODE=npm -t twitch-mcp-server-npm .
+   docker build -t twitch-mcp-server .
    ```
 
 2. Push to your container registry (Docker Hub, etc.)
 
-3. Configure your Glama.ai deployment to use the NPM mode image, which will:
-   - Provide better debugging capabilities
-   - Allow inspection of the Node.js layer
-   - Maintain all Twitch MCP functionality through the Java backend
+3. Configure your Glama.ai deployment to use the image.
 
-Note: The NPM mode acts as a wrapper that manages the Java process, making it easier to inspect and debug while maintaining full functionality.
+The Docker image includes health checks for better monitoring and uses a non-root user for security.
 
 ### NPM Package
 
