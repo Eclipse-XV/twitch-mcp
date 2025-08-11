@@ -1,0 +1,8 @@
+# Smithery build configuration
+build:
+  # Use the Dockerfile in the twitch-mcp-npm directory
+  dockerfilePath: twitch-mcp-npm/Dockerfile
+  # Set the build context to the repository root so all project files are included
+  dockerBuildPath: .
+  # Tag for the built image
+  imageTag: twitch-mcp-npm-server
