@@ -3,9 +3,9 @@
 
 projectType: docker
 build:
-  dockerfilePath: Dockerfile
+  dockerfilePath: twitch-mcp-npm/Dockerfile
   dockerBuildPath: .
-  imageTag: twitch-mcp-server
+  imageTag: twitch-mcp-npm-server
 
 deployment:
   containerPort: 8080
