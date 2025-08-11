@@ -5,24 +5,26 @@ import io.quarkiverse.mcp.server.TextContent;
 import io.quarkiverse.mcp.server.Tool;
 import io.quarkiverse.mcp.server.ToolArg;
 import io.quarkiverse.mcp.server.ToolResponse;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.Arrays;
 
 /**
  * Contains the MCP Definitions.
  */
+@ApplicationScoped
 public class TwitchMcp {
     @Inject
     TwitchClient client;
 
     @Tool(description = "Send message to the Twitch Chat")
-    ToolResponse sendMessageToChat(@ToolArg(description = "The message") String message) {
+    public ToolResponse sendMessageToChat(@ToolArg(description = "The message") String message) {
         client.sendMessage(message);
         return ToolResponse.success(new TextContent("Successfully sent message: " + message));
     }
 
     @Tool(description = "Create a Twitch Poll")
-    ToolResponse createTwitchPoll(
+    public ToolResponse createTwitchPoll(
         @ToolArg(description = "Poll title") String title,
         @ToolArg(description = "Comma-separated choices") String choices,
         @ToolArg(description = "Duration in seconds") int duration
@@ -36,7 +38,7 @@ public class TwitchMcp {
     }
 
     @Tool(description = "Create a Twitch Prediction")
-    ToolResponse createTwitchPrediction(
+    public ToolResponse createTwitchPrediction(
         @ToolArg(description = "Prediction title") String title,
         @ToolArg(description = "Comma-separated outcomes") String outcomes,
         @ToolArg(description = "Duration in seconds") int duration
@@ -50,7 +52,7 @@ public class TwitchMcp {
     }
 
     @Tool(description = "Create a Twitch clip of the current stream")
-    ToolResponse createTwitchClip() {
+    public ToolResponse createTwitchClip() {
         try {
             String result = client.createClip();
             return ToolResponse.success(new TextContent(result));
@@ -60,13 +62,13 @@ public class TwitchMcp {
     }
 
     @Tool(description = "Analyze recent Twitch chat messages and provide a summary of topics and activity")
-    ToolResponse analyzeChat() {
+    public ToolResponse analyzeChat() {
         String analysis = client.analyzeChat();
         return ToolResponse.success(new TextContent(analysis));
     }
 
     @Tool(description = "Get the last 20 chat messages for moderation context")
-    ToolResponse getRecentChatLog() {
+    public ToolResponse getRecentChatLog() {
         var log = client.getRecentChatLog(20);
         if (log.isEmpty()) {
             return ToolResponse.success(new TextContent("No recent chat messages available."));
@@ -75,7 +77,7 @@ public class TwitchMcp {
     }
 
     @Tool(description = "Timeout a user in the Twitch chat. If no username is provided, it will return the recent chat log for LLM review.")
-    ToolResponse timeoutUser(
+    public ToolResponse timeoutUser(
         @ToolArg(description = "Username or descriptor to timeout (e.g. 'toxic', 'spammer', or a username)") String usernameOrDescriptor,
         @ToolArg(description = "Reason for timeout (optional)") String reason
     ) {
@@ -97,7 +99,7 @@ public class TwitchMcp {
     }
 
     @Tool(description = "Ban a user from the Twitch chat. If no username is provided, it will return the recent chat log for LLM review.")
-    ToolResponse banUser(
+    public ToolResponse banUser(
         @ToolArg(description = "Username or descriptor to ban (e.g. 'toxic', 'spammer', or a username)") String usernameOrDescriptor,
         @ToolArg(description = "Reason for ban (optional)") String reason
     ) {
@@ -118,7 +120,7 @@ public class TwitchMcp {
     }
 
     @Tool(name = "updateStreamTitle", description = "Update the stream title")
-    ToolResponse updateStreamTitle(@ToolArg(description = "The new title for the stream") String title) {
+    public ToolResponse updateStreamTitle(@ToolArg(description = "The new title for the stream") String title) {
         try {
             String result = client.updateStreamTitle(title);
             return ToolResponse.success(new TextContent(result));
@@ -128,7 +130,7 @@ public class TwitchMcp {
     }
 
     @Tool(name = "updateStreamCategory", description = "Update the game category of the stream")
-    ToolResponse updateStreamCategory(@ToolArg(description = "The new game category, e.g. 'Fortnite'") String category) {
+    public ToolResponse updateStreamCategory(@ToolArg(description = "The new game category, e.g. 'Fortnite'") String category) {
         try {
             String result = client.updateStreamCategory(category);
             return ToolResponse.success(new TextContent(result));

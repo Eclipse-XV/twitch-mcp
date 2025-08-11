@@ -4,6 +4,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -13,6 +15,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @ApplicationScoped
 public class CamelRoute extends RouteBuilder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CamelRoute.class);
 
     @ConfigProperty(name = "twitch.channel")
     String channel;
@@ -31,6 +35,7 @@ public class CamelRoute extends RouteBuilder {
         // Receives messages from Twitch Chat and logs them.
         from(twitchIrcUrl)
                 .routeId("receiveMessageFromTwitch")
+                .autoStartup(false)
                 .process(exchange -> {
                     String message = exchange.getMessage().getBody(String.class);
                     String messageType = exchange.getMessage().getHeader("irc.messageType", String.class);
@@ -65,17 +70,11 @@ public class CamelRoute extends RouteBuilder {
         from("direct:sendToIrc")
                 .routeId("sendMessageToTwitch")
                 .errorHandler(deadLetterChannel("direct:sendError").maximumRedeliveries(3).redeliveryDelay(1000))
-                .process(exchange -> {
-                    // Log outgoing message
-                    String message = exchange.getMessage().getBody(String.class);
-                    System.out.println("Sending to Twitch: " + message);
-                })
+                .log("Sending to Twitch: ${body}")
                 .setHeader("irc.sendTo", constant("#" + channel))
                 .setBody(simple("${body}"))
                 .to(twitchIrcUrl)
-                .process(exchange -> {
-                    System.out.println("Message sent successfully");
-                });
+                .log("Message sent successfully");
 
         // Error handling for failed sends
         from("direct:sendError")
@@ -83,9 +82,9 @@ public class CamelRoute extends RouteBuilder {
                 .process(exchange -> {
                     String message = exchange.getMessage().getBody(String.class);
                     Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-                    System.err.println("Failed to send message after retries: " + message);
+                    LOG.error("Failed to send message after retries: {}", message);
                     if (cause != null) {
-                        System.err.println("Error: " + cause.getMessage());
+                        LOG.error("Error: {}", cause.getMessage());
                     }
                 });
     }
