@@ -3,10 +3,10 @@
 
 projectType: docker
 build:
-  dockerfilePath: twitch-mcp-npm/Dockerfile
+  dockerfilePath: Dockerfile.smithery
   dockerBuildPath: .
-  imageTag: twitch-mcp-npm-server
+  imageTag: twitch-mcp-server
 
 deployment:
   containerPort: 8080
-  healthCheckPath: /q/health
+  # healthCheckPath: /mcp  # Optional: enable after verifying endpoint

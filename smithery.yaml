@@ -1,8 +1,9 @@
 # Smithery build configuration
+projectType: docker
 build:
-  # Use the Dockerfile in the twitch-mcp-npm directory
-  dockerfilePath: twitch-mcp-npm/Dockerfile
-  # Set the build context to the repository root so all project files are included
+  dockerfilePath: Dockerfile.smithery
   dockerBuildPath: .
-  # Tag for the built image
-  imageTag: twitch-mcp-npm-server
+  imageTag: twitch-mcp-server
+deployment:
+  containerPort: 8080
+  # healthCheckPath: /mcp  # Optional: enable after verifying endpoint
