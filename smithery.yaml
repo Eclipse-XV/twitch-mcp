@@ -6,3 +6,17 @@ build:
   dockerBuildPath: .
   # Tag for the built image
   imageTag: twitch-mcp-server
+  # Build arguments (if needed)
+  buildArgs: {}
+  
+# Optional: Define ports that the application uses
+ports:
+  - 8080
+  
+# Optional: Define health check endpoint
+healthCheck:
+  path: /q/health
+  port: 8080
+  
+# Optional: Define environment variables
+environment: {}
