@@ -1,0 +1,12 @@
+# Smithery configuration file
+# https://smithery.ai/docs/build/project-config
+
+projectType: docker
+build:
+  dockerfilePath: Dockerfile
+  dockerBuildPath: .
+  imageTag: twitch-mcp-server
+
+deployment:
+  containerPort: 8080
+  healthCheckPath: /q/health
