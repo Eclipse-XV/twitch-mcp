@@ -354,9 +354,10 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const configChanged = applyConfigFromQuery(url);
   // Only (re)start Java on POST, not on GET, to keep discovery fast
+  // But don't restart Java for tools/list requests even if config changed
   if (configChanged && req.method === 'POST') {
-    if (javaProc) { try { javaProc.kill(); } catch (_) {} }
-    startJava();
+    // Defer the Java restart decision until we know if it's a tools/list request
+    // The actual restart logic will be handled in the POST body processing
   }
   if (url.pathname !== '/mcp') {
     console.log(`[${new Date().toISOString()}] 404 - Not found: ${url.pathname}`);
@@ -390,6 +391,24 @@ const server = http.createServer((req, res) => {
     });
     req.on('end', () => {
       console.log(`[${new Date().toISOString()}] POST body received, forwarding to JsonRpc`);
+      // Check for tools/list before potentially restarting Java due to config changes
+      let isToolsList = false;
+      try {
+        const payload = typeof body === 'string' ? JSON.parse(body) : body;
+        isToolsList = payload && payload.method === 'tools/list';
+      } catch (e) {
+        // If we can't parse, continue with normal flow
+      }
+      
+      // If config changed and this is NOT a tools/list request, restart Java
+      if (configChanged && !isToolsList) {
+        console.log(`[${new Date().toISOString()}] Restarting Java due to config change (not tools/list)`);
+        if (javaProc) { try { javaProc.kill(); } catch (_) {} }
+        startJava();
+      } else if (configChanged && isToolsList) {
+        console.log(`[${new Date().toISOString()}] Skipping Java restart for tools/list request with config change`);
+      }
+      
       forwardJsonRpc(body, (err, responsePayload) => {
         if (err) {
           console.log(`[${new Date().toISOString()}] JsonRpc error: ${err.message}`);
