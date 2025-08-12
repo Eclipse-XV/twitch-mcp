@@ -102,41 +102,59 @@ function startJava() {
 }
 
 function forwardJsonRpc(requestBody, cb) {
-  if (!javaProc) startJava();
-  let payload;
-  try {
-    payload = typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody;
-  } catch (e) {
-    return cb(Object.assign(new Error('Invalid JSON'), { status: 400 }));
-  }
-  // Support batch and single; handle only single simply
-  const isBatch = Array.isArray(payload);
-  if (isBatch) {
-    // Minimal batch: send each and collect
-    const results = new Array(payload.length);
-    let remaining = payload.length;
-    if (remaining === 0) return cb(null, []);
-    payload.forEach((item, i) => {
-      sendSingle(item, (err, res) => {
-        results[i] = err ? { jsonrpc: '2.0', id: item && item.id, error: { code: -32000, message: String(err.message || err) } } : res;
-        remaining -= 1;
-        if (remaining === 0) cb(null, results);
-      });
-    });
-    return;
-  }
-  sendSingle(payload, cb);
-
-  function sendSingle(item, done) {
-    if (!item || typeof item !== 'object') return done(new Error('Invalid JSON-RPC payload'));
-    const id = item.id;
-    if (typeof id === 'undefined' || id === null) return done(new Error('JSON-RPC id is required'));
-    pending.set(String(id), done);
+  if (!javaProc) {
     try {
-      writeFramedJsonRpc(javaProc, item);
+      startJava();
+      // Give Java a moment to start before sending requests
+      setTimeout(() => {
+        if (!javaProc) {
+          return cb(new Error('Java MCP server failed to start'));
+        }
+        processRequest();
+      }, 500); // Increased delay to 500ms
+      return;
+    } catch (error) {
+      return cb(new Error(`Failed to start Java MCP server: ${error.message}`));
+    }
+  }
+  processRequest();
+
+  function processRequest() {
+    let payload;
+    try {
+      payload = typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody;
     } catch (e) {
-      pending.delete(String(id));
-      return done(e);
+      return cb(Object.assign(new Error('Invalid JSON'), { status: 400 }));
+    }
+    // Support batch and single; handle only single simply
+    const isBatch = Array.isArray(payload);
+    if (isBatch) {
+      // Minimal batch: send each and collect
+      const results = new Array(payload.length);
+      let remaining = payload.length;
+      if (remaining === 0) return cb(null, []);
+      payload.forEach((item, i) => {
+        sendSingle(item, (err, res) => {
+          results[i] = err ? { jsonrpc: '2.0', id: item && item.id, error: { code: -32000, message: String(err.message || err) } } : res;
+          remaining -= 1;
+          if (remaining === 0) cb(null, results);
+        });
+      });
+      return;
+    }
+    sendSingle(payload, cb);
+
+    function sendSingle(item, done) {
+      if (!item || typeof item !== 'object') return done(new Error('Invalid JSON-RPC payload'));
+      const id = item.id;
+      if (typeof id === 'undefined' || id === null) return done(new Error('JSON-RPC id is required'));
+      pending.set(String(id), done);
+      try {
+        writeFramedJsonRpc(javaProc, item);
+      } catch (e) {
+        pending.delete(String(id));
+        return done(e);
+      }
     }
   }
 }
@@ -219,8 +237,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  // Start Java immediately so the first POST doesn't incur startup delay
-  startJava();
+  // Don't start Java immediately - wait for first POST to avoid startup issues with missing config
+  // startJava(); // commented out - will start on first POST request
   // eslint-disable-next-line no-console
   console.log(`MCP HTTP bridge listening on :${PORT} at /mcp`);
 });

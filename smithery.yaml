@@ -19,7 +19,7 @@ startCommand:
       TWITCH_AUTH:
         type: "string"
         description: "Twitch OAuth access token (no oauth: prefix)"
-    required: ["TWITCH_CLIENT_ID", "TWITCH_BROADCASTER_ID", "TWITCH_CHANNEL", "TWITCH_AUTH"]
+    required: []
   exampleConfig:
     TWITCH_CLIENT_ID: "your-client-id"
     TWITCH_BROADCASTER_ID: "123456789"
