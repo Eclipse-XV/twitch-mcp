@@ -42,6 +42,13 @@ public class TwitchClient {
     @ConfigProperty(name = "twitch.show_connection_message", defaultValue = "false")
     boolean showConnectionMessage;
 
+    // Helper method to check if Twitch is configured
+    private boolean isTwitchConfigured() {
+        return authToken != null && !authToken.trim().isEmpty() &&
+               clientId != null && !clientId.trim().isEmpty() &&
+               broadcasterId != null && !broadcasterId.trim().isEmpty();
+    }
+
     // List of descriptors and associated keywords
     private static final Map<String, List<String>> DESCRIPTOR_KEYWORDS = Map.of(
         "toxic", List.of("idiot", "stupid", "hate", "kill", "dumb", "trash", "noob", "loser", "shut up", "annoying", "toxic", "rude", "mean", "sucks", "bad", "worst", "report", "ban"),
@@ -50,17 +57,26 @@ public class TwitchClient {
     );
 
     public void sendMessage(String message) {
+        if (!isTwitchConfigured()) {
+            // Log that message sending is disabled due to missing configuration
+            System.out.println("Twitch message sending disabled: " + message);
+            return;
+        }
         producerTemplate.sendBody("direct:sendToIrc", message);
     }
 
     // Post something to the Twitch chat after connect.
     void onStart(@Observes StartupEvent ev) {
-        if (showConnectionMessage) {
+        if (showConnectionMessage && isTwitchConfigured()) {
             this.sendMessage("Twitch MCP Server connected");
         }
     }
 
     public String createPoll(String title, List<String> choices, int duration) throws Exception {
+        if (!isTwitchConfigured()) {
+            return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
+        }
+        
         URL url = new URL("https://api.twitch.tv/helix/polls");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
@@ -93,6 +109,10 @@ public class TwitchClient {
     }
 
     public String createPrediction(String title, List<String> outcomes, int duration) throws Exception {
+        if (!isTwitchConfigured()) {
+            return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
+        }
+        
         URL url = new URL("https://api.twitch.tv/helix/predictions");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
@@ -219,6 +239,10 @@ public class TwitchClient {
     }
 
     private String getUserIdFromUsername(String username) throws Exception {
+        if (!isTwitchConfigured()) {
+            throw new IllegalStateException("Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.");
+        }
+        
         URL url = new URL("https://api.twitch.tv/helix/users?login=" + username);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -246,6 +270,10 @@ public class TwitchClient {
     }
 
     public String timeoutUser(String username, String reason, int duration) throws Exception {
+        if (!isTwitchConfigured()) {
+            return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
+        }
+        
         if (username == null || username.isEmpty()) {
             return "No username provided for timeout.";
         }
@@ -279,13 +307,19 @@ public class TwitchClient {
                 while ((line = reader.readLine()) != null) {
                     errorResponse.append(line);
                 }
-                errorMsg += "\n" + errorResponse.toString();
-            } catch (Exception ignored) {}
+                errorMsg += " - " + errorResponse.toString();
+            } catch (Exception e) {
+                // Ignore error stream reading errors
+            }
             return errorMsg;
         }
     }
 
     public String banUser(String username, String reason) throws Exception {
+        if (!isTwitchConfigured()) {
+            return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
+        }
+        
         if (username == null || username.isEmpty()) {
             return "No username provided for ban.";
         }
@@ -342,6 +376,10 @@ public class TwitchClient {
     }
 
     public String createClip() throws Exception {
+        if (!isTwitchConfigured()) {
+            return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
+        }
+        
         URL url = new URL("https://api.twitch.tv/helix/clips?broadcaster_id=" + broadcasterId);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
@@ -436,6 +474,10 @@ public class TwitchClient {
     }
 
     public String updateStreamTitle(String newTitle) throws Exception {
+        if (!isTwitchConfigured()) {
+            return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
+        }
+        
         if (newTitle == null || newTitle.isEmpty()) {
             return "No title provided.";
         }
@@ -478,6 +520,10 @@ public class TwitchClient {
     }
 
     public String updateStreamCategory(String categoryName) throws Exception {
+        if (!isTwitchConfigured()) {
+            return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
+        }
+        
         if (categoryName == null || categoryName.isEmpty()) {
             return "No category provided.";
         }
