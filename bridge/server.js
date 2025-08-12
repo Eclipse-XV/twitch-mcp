@@ -220,6 +220,20 @@ function startJava() {
 }
 
 function forwardJsonRpc(requestBody, cb) {
+  // Fast-path check for tools/list - bypass all Java startup logic
+  let quickPayload;
+  try {
+    quickPayload = typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody;
+  } catch (e) {
+    // If we can't parse, continue with normal flow
+  }
+  
+  if (quickPayload && quickPayload.method === 'tools/list') {
+    console.log(`[${new Date().toISOString()}] Fast-path tools/list response`);
+    const response = { ...FALLBACK_TOOLS, id: quickPayload.id };
+    return cb(null, response);
+  }
+
   if (!javaProc) {
     try {
       startJava();
@@ -385,7 +399,8 @@ server.listen(PORT, () => {
   // Start Java immediately now that lazy loading is implemented in Java code
   startJava();
   // eslint-disable-next-line no-console
-  console.log(`MCP HTTP bridge listening on :${PORT} at /mcp`);
+  console.log(`[${new Date().toISOString()}] MCP HTTP bridge listening on :${PORT} at /mcp`);
+  console.log(`[${new Date().toISOString()}] Bridge ready for requests`);
 });
 
 
