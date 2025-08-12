@@ -30,13 +30,13 @@ public class TwitchClient {
     @Inject
     CamelRoute camelRoute;
 
-    @ConfigProperty(name = "twitch.auth")
+    @ConfigProperty(name = "twitch.auth", defaultValue = "")
     String authToken;
 
-    @ConfigProperty(name = "twitch.client_id")
+    @ConfigProperty(name = "twitch.client_id", defaultValue = "")
     String clientId;
 
-    @ConfigProperty(name = "twitch.broadcaster_id")
+    @ConfigProperty(name = "twitch.broadcaster_id", defaultValue = "")
     String broadcasterId;
 
     @ConfigProperty(name = "twitch.show_connection_message", defaultValue = "false")

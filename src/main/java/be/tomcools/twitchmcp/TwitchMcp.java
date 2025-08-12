@@ -19,8 +19,12 @@ public class TwitchMcp {
 
     @Tool(description = "Send message to the Twitch Chat")
     public ToolResponse sendMessageToChat(@ToolArg(description = "The message") String message) {
-        client.sendMessage(message);
-        return ToolResponse.success(new TextContent("Successfully sent message: " + message));
+        try {
+            client.sendMessage(message);
+            return ToolResponse.success(new TextContent("Successfully sent message: " + message));
+        } catch (Exception e) {
+            return ToolResponse.success(new TextContent("Send skipped (missing config?): " + e.getMessage()));
+        }
     }
 
     @Tool(description = "Create a Twitch Poll")

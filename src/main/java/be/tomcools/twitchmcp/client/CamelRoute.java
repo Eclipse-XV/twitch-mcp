@@ -18,9 +18,9 @@ public class CamelRoute extends RouteBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(CamelRoute.class);
 
-    @ConfigProperty(name = "twitch.channel")
+    @ConfigProperty(name = "twitch.channel", defaultValue = "")
     String channel;
-    @ConfigProperty(name = "twitch.auth")
+    @ConfigProperty(name = "twitch.auth", defaultValue = "")
     String authToken;
 
     // Store last 100 messages for analysis
@@ -29,6 +29,14 @@ public class CamelRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+        if (channel == null || channel.isBlank() || authToken == null || authToken.isBlank()) {
+            // No Twitch config provided: define stub routes to keep app running and tool listing available
+            from("direct:sendToIrc")
+                    .routeId("sendMessageToTwitch-disabled")
+                    .log("Twitch config not provided; skipping send: ${body}");
+            return;
+        }
+
         String twitchIrcUrl = "irc:%s@irc.chat.twitch.tv:6667?nickname=%s&password=oauth:%s&channels=#%s&autoRejoin=true&persistent=true&colors=false&onReply=true&onNick=false&onQuit=false&onJoin=false&onKick=false&onMode=false&onPart=false&onTopic=false&commandTimeout=5000"
                 .formatted(channel, channel, authToken, channel);
 
