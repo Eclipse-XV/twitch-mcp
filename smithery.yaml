@@ -1,8 +1,8 @@
-# Smithery configuration for Twitch MCP Server (root Dockerfile)
+# Smithery configuration for Twitch MCP Server (isolated build context)
 projectType: docker
 build:
-  dockerfilePath: Dockerfile
-  dockerBuildPath: .
+  dockerfilePath: smithery/Dockerfile
+  dockerBuildPath: smithery
   imageTag: twitch-mcp-server
 deployment:
   containerPort: 8080

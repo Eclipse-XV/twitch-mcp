@@ -3,8 +3,8 @@
 
 projectType: docker
 build:
-  dockerfilePath: Dockerfile
-  dockerBuildPath: .
+  dockerfilePath: smithery/Dockerfile
+  dockerBuildPath: smithery
   imageTag: twitch-mcp-server
 
 deployment:
