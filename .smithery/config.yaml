@@ -9,3 +9,4 @@ build:
 
 deployment:
   containerPort: 8080
+  healthCheckPath: /q/health
