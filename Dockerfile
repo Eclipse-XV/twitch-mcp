@@ -27,7 +27,7 @@ FROM eclipse-temurin:21-jre-jammy as jre
 WORKDIR /app
 
 # Copy the built JAR from build stage
-COPY --from=build /build/target/twitch-mcp-1.0.0-SNAPSHOT-runner.jar /app/server.jar
+COPY --from=build /build/target/server-runner.jar /app/server.jar
 
 FROM node:20-bookworm-slim as runtime
 WORKDIR /app
