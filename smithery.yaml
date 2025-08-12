@@ -1,8 +1,4 @@
-# Smithery configuration for Twitch MCP Server (isolated build context)
-projectType: docker
-build:
-  dockerfilePath: smithery/Dockerfile
-  dockerBuildPath: smithery
-  imageTag: twitch-mcp-server
-deployment:
-  containerPort: 8080
+version: 1
+start:
+  command: ["java", "-Dquarkus.http.host=0.0.0.0", "-jar", "/app/server.jar"]
+  port: 8080
