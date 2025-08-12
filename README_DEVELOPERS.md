@@ -77,6 +77,32 @@ For deployment on Glama.ai, you can use the standard Docker image:
 
 The Docker image includes health checks for better monitoring and uses a non-root user for security.
 
+### Smithery.ai Deployment
+
+For deployment on Smithery.ai, you need to create a specialized Docker image:
+
+1. Build the Java application:
+   ```bash
+   ./mvnw package -DskipTests
+   ```
+
+2. Copy the JAR file to the smithery directory:
+   ```bash
+   cp target/server-runner.jar smithery/server.jar
+   ```
+
+3. Build the Smithery Docker image:
+   ```bash
+   cd smithery
+   docker build -t twitch-mcp-smithery .
+   ```
+
+Alternatively, you can use the provided deployment scripts:
+- On Unix/Linux/macOS: `./deploy-smithery.sh`
+- On Windows: `deploy-smithery.bat`
+
+The Smithery deployment uses a minimal Docker image that only includes the Java runtime and the application JAR file.
+
 ### NPM Package
 
 The project also includes an NPM package for easy distribution. The package bundles the runner and is the recommended path for normal users.
