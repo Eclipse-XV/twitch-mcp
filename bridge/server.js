@@ -13,6 +13,7 @@ const PORT = Number(process.env.PORT || 8080);
 
 // Launch Java MCP server (stdio)
 let javaProc = null;
+let javaReady = false;
 let nextSessionId = 1;
 let activeSessionId = null;
 let currentConfig = {};
@@ -141,6 +142,7 @@ function startJava() {
     try { javaProc.kill(); } catch (_) {}
   }
   activeSessionId = `s-${nextSessionId++}`;
+  javaReady = false;
   const args = ['-jar', '/app/server.jar'];
   
   console.log(`[${new Date().toISOString()}] Starting Java MCP server with session ${activeSessionId}`);
@@ -175,6 +177,11 @@ function startJava() {
       try {
         const msg = JSON.parse(payload.toString('utf8'));
         if (msg && Object.prototype.hasOwnProperty.call(msg, 'id')) {
+          // Mark Java as ready on first successful response
+          if (!javaReady) {
+            javaReady = true;
+            console.log(`[${new Date().toISOString()}] Java MCP server is ready`);
+          }
           const handler = pending.get(String(msg.id));
           if (handler) {
             pending.delete(String(msg.id));
@@ -200,6 +207,7 @@ function startJava() {
 
   javaProc.on('exit', (code) => {
     console.log(`[${new Date().toISOString()}] Java MCP server exited with code ${code}`);
+    javaReady = false;
     // Fail pending requests
     for (const [, handler] of pending.entries()) {
       const err = new Error(`MCP server exited with code ${code}`);
@@ -215,11 +223,8 @@ function forwardJsonRpc(requestBody, cb) {
   if (!javaProc) {
     try {
       startJava();
-      // Brief delay for Java startup
+      // Brief delay for Java startup, but always proceed to processRequest regardless
       setTimeout(() => {
-        if (!javaProc) {
-          return cb(new Error('Java MCP server failed to start'));
-        }
         processRequest();
       }, 100); // Reduced to 100ms for faster response
       return;
@@ -237,12 +242,13 @@ function forwardJsonRpc(requestBody, cb) {
       return cb(Object.assign(new Error('Invalid JSON'), { status: 400 }));
     }
     
-    // Fast fallback for tools/list to avoid timeout during discovery
-    if (payload && payload.method === 'tools/list' && !javaProc) {
-      console.log(`[${new Date().toISOString()}] Using fallback tools/list response (Java not ready)`);
+    // Always use fallback for tools/list to ensure fast discovery
+    if (payload && payload.method === 'tools/list') {
+      console.log(`[${new Date().toISOString()}] Using fallback tools/list response for fast discovery`);
       const response = { ...FALLBACK_TOOLS, id: payload.id };
       return cb(null, response);
     }
+    
     // Support batch and single; handle only single simply
     const isBatch = Array.isArray(payload);
     if (isBatch) {
