@@ -240,7 +240,7 @@ function forwardJsonRpc(requestBody, cb) {
       // Brief delay for Java startup, but always proceed to processRequest regardless
       setTimeout(() => {
         processRequest();
-      }, 100); // Reduced to 100ms for faster response
+      }, 50); // Reduced to 50ms for faster response
       return;
     } catch (error) {
       return cb(new Error(`Failed to start Java MCP server: ${error.message}`));
@@ -289,7 +289,7 @@ function forwardJsonRpc(requestBody, cb) {
       console.log(`[${new Date().toISOString()}] Sending MCP request: ${item.method} (id: ${id})`);
       
       // Add timeout for MCP requests to prevent hanging
-      const timeoutMs = 10000; // 10 second timeout
+      const timeoutMs = 5000; // 5 second timeout for faster response
       const timeoutId = setTimeout(() => {
         if (pending.has(String(id))) {
           pending.delete(String(id));
