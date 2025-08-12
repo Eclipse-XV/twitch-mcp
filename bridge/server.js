@@ -163,8 +163,8 @@ const server = http.createServer((req, res) => {
 
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const configChanged = applyConfigFromQuery(url);
-  if (configChanged && req.method !== 'DELETE') {
-    // Restart Java to pick up new config
+  // Only (re)start Java on POST, not on GET, to keep discovery fast
+  if (configChanged && req.method === 'POST') {
     if (javaProc) { try { javaProc.kill(); } catch (_) {} }
     startJava();
   }
@@ -209,7 +209,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  startJava();
+  // Delay Java start until first POST to avoid slowing down tool scanning
   // eslint-disable-next-line no-console
   console.log(`MCP HTTP bridge listening on :${PORT} at /mcp`);
 });
