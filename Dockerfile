@@ -10,6 +10,9 @@ COPY mvnw .
 COPY mvnw.cmd .
 COPY .mvn .mvn
 
+# Make wrapper executable
+RUN chmod +x mvnw
+
 # Download dependencies
 RUN ./mvnw dependency:go-offline
 
