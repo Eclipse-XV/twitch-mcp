@@ -1,9 +1,9 @@
-# Smithery build configuration
+# Smithery build configuration for Twitch MCP Server
 projectType: docker
 build:
-  dockerfilePath: Dockerfile.smithery
+  dockerfilePath: Dockerfile.smithery.optimized
   dockerBuildPath: .
   imageTag: twitch-mcp-server
 deployment:
   containerPort: 8080
-  # healthCheckPath: /mcp  # Optional: enable after verifying endpoint
+  # healthCheckPath: /q/health  # Enable after verifying endpoint works
