@@ -4,3 +4,24 @@ build:
   dockerBuildPath: "."
 startCommand:
   type: "http"
+  configSchema:
+    type: "object"
+    properties:
+      TWITCH_CLIENT_ID:
+        type: "string"
+        description: "Your Twitch app client ID"
+      TWITCH_BROADCASTER_ID:
+        type: "string"
+        description: "Broadcaster/channel ID"
+      TWITCH_CHANNEL:
+        type: "string"
+        description: "Twitch channel name"
+      TWITCH_AUTH:
+        type: "string"
+        description: "Twitch OAuth access token (no oauth: prefix)"
+    required: []
+  exampleConfig:
+    TWITCH_CLIENT_ID: "your-client-id"
+    TWITCH_BROADCASTER_ID: "123456789"
+    TWITCH_CHANNEL: "yourchannel"
+    TWITCH_AUTH: "your-token"
