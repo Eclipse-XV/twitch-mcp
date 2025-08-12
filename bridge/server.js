@@ -209,7 +209,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  // Delay Java start until first POST to avoid slowing down tool scanning
+  // Start Java immediately so the first POST doesn't incur startup delay
+  startJava();
   // eslint-disable-next-line no-console
   console.log(`MCP HTTP bridge listening on :${PORT} at /mcp`);
 });
