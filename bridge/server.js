@@ -22,6 +22,113 @@ const MAX_STDERR_LINES = 100;
 // Map of pending HTTP responses by JSON-RPC id
 const pending = new Map();
 
+// Fallback tool list for fast discovery when Java is slow
+const FALLBACK_TOOLS = {
+  "jsonrpc": "2.0",
+  "result": {
+    "tools": [
+      {
+        "name": "sendMessageToChat",
+        "description": "Send message to the Twitch Chat",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "message": {"type": "string", "description": "The message"}
+          },
+          "required": ["message"]
+        }
+      },
+      {
+        "name": "createTwitchPoll", 
+        "description": "Create a Twitch Poll",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {"type": "string", "description": "Poll title"},
+            "choices": {"type": "string", "description": "Comma-separated choices"},
+            "duration": {"type": "integer", "description": "Duration in seconds"}
+          },
+          "required": ["title", "choices", "duration"]
+        }
+      },
+      {
+        "name": "createTwitchPrediction",
+        "description": "Create a Twitch Prediction", 
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {"type": "string", "description": "Prediction title"},
+            "outcomes": {"type": "string", "description": "Comma-separated outcomes"},
+            "duration": {"type": "integer", "description": "Duration in seconds"}
+          },
+          "required": ["title", "outcomes", "duration"]
+        }
+      },
+      {
+        "name": "createTwitchClip",
+        "description": "Create a Twitch clip of the current stream",
+        "inputSchema": {"type": "object", "properties": {}}
+      },
+      {
+        "name": "analyzeChat",
+        "description": "Analyze recent Twitch chat messages and provide a summary of topics and activity",
+        "inputSchema": {"type": "object", "properties": {}}
+      },
+      {
+        "name": "getRecentChatLog",
+        "description": "Get the last 20 chat messages for moderation context",
+        "inputSchema": {"type": "object", "properties": {}}
+      },
+      {
+        "name": "timeoutUser",
+        "description": "Timeout a user in the Twitch chat. If no username is provided, it will return the recent chat log for LLM review.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "usernameOrDescriptor": {"type": "string", "description": "Username or descriptor to timeout (e.g. 'toxic', 'spammer', or a username)"},
+            "reason": {"type": "string", "description": "Reason for timeout (optional)"}
+          },
+          "required": ["usernameOrDescriptor", "reason"]
+        }
+      },
+      {
+        "name": "banUser",
+        "description": "Ban a user from the Twitch chat. If no username is provided, it will return the recent chat log for LLM review.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "usernameOrDescriptor": {"type": "string", "description": "Username or descriptor to ban (e.g. 'toxic', 'spammer', or a username)"},
+            "reason": {"type": "string", "description": "Reason for ban (optional)"}
+          },
+          "required": ["usernameOrDescriptor", "reason"]
+        }
+      },
+      {
+        "name": "updateStreamTitle",
+        "description": "Update the stream title",
+        "inputSchema": {
+          "type": "object", 
+          "properties": {
+            "title": {"type": "string", "description": "The new title for the stream"}
+          },
+          "required": ["title"]
+        }
+      },
+      {
+        "name": "updateStreamCategory",
+        "description": "Update the game category of the stream",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "category": {"type": "string", "description": "The new game category, e.g. 'Fortnite'"}
+          },
+          "required": ["category"]
+        }
+      }
+    ]
+  }
+};
+
 function writeFramedJsonRpc(child, obj) {
   const json = Buffer.from(JSON.stringify(obj), 'utf8');
   const header = Buffer.from(`Content-Length: ${json.length}\r\n\r\n`, 'utf8');
@@ -35,6 +142,8 @@ function startJava() {
   }
   activeSessionId = `s-${nextSessionId++}`;
   const args = ['-jar', '/app/server.jar'];
+  
+  console.log(`[${new Date().toISOString()}] Starting Java MCP server with session ${activeSessionId}`);
 
   javaProc = spawn('java', args, {
     env: process.env,
@@ -90,6 +199,7 @@ function startJava() {
   });
 
   javaProc.on('exit', (code) => {
+    console.log(`[${new Date().toISOString()}] Java MCP server exited with code ${code}`);
     // Fail pending requests
     for (const [, handler] of pending.entries()) {
       const err = new Error(`MCP server exited with code ${code}`);
@@ -126,6 +236,13 @@ function forwardJsonRpc(requestBody, cb) {
     } catch (e) {
       return cb(Object.assign(new Error('Invalid JSON'), { status: 400 }));
     }
+    
+    // Fast fallback for tools/list to avoid timeout during discovery
+    if (payload && payload.method === 'tools/list' && !javaProc) {
+      console.log(`[${new Date().toISOString()}] Using fallback tools/list response (Java not ready)`);
+      const response = { ...FALLBACK_TOOLS, id: payload.id };
+      return cb(null, response);
+    }
     // Support batch and single; handle only single simply
     const isBatch = Array.isArray(payload);
     if (isBatch) {
@@ -148,7 +265,29 @@ function forwardJsonRpc(requestBody, cb) {
       if (!item || typeof item !== 'object') return done(new Error('Invalid JSON-RPC payload'));
       const id = item.id;
       if (typeof id === 'undefined' || id === null) return done(new Error('JSON-RPC id is required'));
-      pending.set(String(id), done);
+      
+      console.log(`[${new Date().toISOString()}] Sending MCP request: ${item.method} (id: ${id})`);
+      
+      // Add timeout for MCP requests to prevent hanging
+      const timeoutMs = 10000; // 10 second timeout
+      const timeoutId = setTimeout(() => {
+        if (pending.has(String(id))) {
+          pending.delete(String(id));
+          console.log(`[${new Date().toISOString()}] MCP request timed out: ${item.method} (id: ${id})`);
+          done(new Error(`MCP request timed out after ${timeoutMs}ms`));
+        }
+      }, timeoutMs);
+      
+      pending.set(String(id), (err, result) => {
+        clearTimeout(timeoutId);
+        if (err) {
+          console.log(`[${new Date().toISOString()}] MCP request failed: ${item.method} (id: ${id}) - ${err.message}`);
+        } else {
+          console.log(`[${new Date().toISOString()}] MCP request succeeded: ${item.method} (id: ${id})`);
+        }
+        done(err, result);
+      });
+      
       try {
         writeFramedJsonRpc(javaProc, item);
       } catch (e) {
