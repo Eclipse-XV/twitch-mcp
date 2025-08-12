@@ -228,10 +228,30 @@ function forwardJsonRpc(requestBody, cb) {
     // If we can't parse, continue with normal flow
   }
   
+  // Always use fallback for tools/list to ensure fast discovery
   if (quickPayload && quickPayload.method === 'tools/list') {
     console.log(`[${new Date().toISOString()}] Fast-path tools/list response`);
     const response = { ...FALLBACK_TOOLS, id: quickPayload.id };
     return cb(null, response);
+  }
+  
+  // Also handle tools/get to ensure fast discovery
+  if (quickPayload && quickPayload.method === 'tools/get') {
+    console.log(`[${new Date().toISOString()}] Fast-path tools/get response`);
+    // For tools/get, we need to check if the requested tool exists in our fallback list
+    if (quickPayload.params && quickPayload.params.name) {
+      const toolName = quickPayload.params.name;
+      const tool = FALLBACK_TOOLS.result.tools.find(t => t.name === toolName);
+      if (tool) {
+        const response = {
+          jsonrpc: "2.0",
+          result: { tool },
+          id: quickPayload.id
+        };
+        return cb(null, response);
+      }
+    }
+    // If tool not found, fall through to normal processing
   }
 
   if (!javaProc) {
@@ -289,7 +309,7 @@ function forwardJsonRpc(requestBody, cb) {
       console.log(`[${new Date().toISOString()}] Sending MCP request: ${item.method} (id: ${id})`);
       
       // Add timeout for MCP requests to prevent hanging
-      const timeoutMs = 5000; // 5 second timeout for faster response
+      const timeoutMs = 30000; // Increase to 30 seconds for Smithery compatibility
       const timeoutId = setTimeout(() => {
         if (pending.has(String(id))) {
           pending.delete(String(id));
@@ -393,20 +413,22 @@ const server = http.createServer((req, res) => {
       console.log(`[${new Date().toISOString()}] POST body received, forwarding to JsonRpc`);
       // Check for tools/list before potentially restarting Java due to config changes
       let isToolsList = false;
+      let isToolsGet = false;
       try {
         const payload = typeof body === 'string' ? JSON.parse(body) : body;
         isToolsList = payload && payload.method === 'tools/list';
+        isToolsGet = payload && payload.method === 'tools/get';
       } catch (e) {
         // If we can't parse, continue with normal flow
       }
       
-      // If config changed and this is NOT a tools/list request, restart Java
-      if (configChanged && !isToolsList) {
-        console.log(`[${new Date().toISOString()}] Restarting Java due to config change (not tools/list)`);
+      // If config changed and this is NOT a tools/list or tools/get request, restart Java
+      if (configChanged && !isToolsList && !isToolsGet) {
+        console.log(`[${new Date().toISOString()}] Restarting Java due to config change (not tools/list or tools/get)`);
         if (javaProc) { try { javaProc.kill(); } catch (_) {} }
         startJava();
-      } else if (configChanged && isToolsList) {
-        console.log(`[${new Date().toISOString()}] Skipping Java restart for tools/list request with config change`);
+      } else if (configChanged && (isToolsList || isToolsGet)) {
+        console.log(`[${new Date().toISOString()}] Skipping Java restart for tool discovery request with config change`);
       }
       
       forwardJsonRpc(body, (err, responsePayload) => {
