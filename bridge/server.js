@@ -15,6 +15,7 @@ const PORT = Number(process.env.PORT || 8080);
 let javaProc = null;
 let nextSessionId = 1;
 let activeSessionId = null;
+let currentConfig = {};
 
 // Map of pending HTTP responses by JSON-RPC id
 const pending = new Map();
@@ -111,6 +112,27 @@ function forwardJsonRpc(requestBody, cb) {
   }
 }
 
+function applyConfigFromQuery(urlObj) {
+  // Map all query params directly into env and config map
+  // Example: /mcp?TWITCH_CHANNEL=foo&TWITCH_AUTH=bar
+  const params = Object.fromEntries(urlObj.searchParams.entries());
+  if (Object.keys(params).length === 0) return false;
+  let changed = false;
+  for (const [key, value] of Object.entries(params)) {
+    if (currentConfig[key] !== value) {
+      changed = true;
+    }
+  }
+  if (changed) {
+    currentConfig = { ...currentConfig, ...params };
+    // Apply to process.env for new Java processes
+    for (const [k, v] of Object.entries(params)) {
+      process.env[k] = v;
+    }
+  }
+  return changed;
+}
+
 const server = http.createServer((req, res) => {
   // Simple CORS for tooling
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -121,6 +143,12 @@ const server = http.createServer((req, res) => {
   }
 
   const url = new URL(req.url, `http://localhost:${PORT}`);
+  const configChanged = applyConfigFromQuery(url);
+  if (configChanged && req.method !== 'DELETE') {
+    // Restart Java to pick up new config
+    if (javaProc) { try { javaProc.kill(); } catch (_) {} }
+    startJava();
+  }
   if (url.pathname !== '/mcp') {
     res.statusCode = 404; res.end('Not Found'); return;
   }
