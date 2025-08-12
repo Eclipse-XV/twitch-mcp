@@ -3,7 +3,7 @@
 
 projectType: docker
 build:
-  dockerfilePath: Dockerfile.smithery.optimized
+  dockerfilePath: Dockerfile.smithery.minimal
   dockerBuildPath: .
   imageTag: twitch-mcp-server
 

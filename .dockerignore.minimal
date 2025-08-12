@@ -1,0 +1,34 @@
+# Minimal .dockerignore for Smithery deployment
+# Only exclude essential files, keep target directory with jar
+
+**/.git
+**/.gitignore
+**/.env
+**/node_modules
+**/*.log
+**/*.tmp
+**/*.bak
+**/*.backup
+**/.DS_Store
+**/.idea
+**/.vscode
+**/.m2
+**/.cache
+**/build
+**/dist
+**/gradle-app.setting
+**/nbbuild
+**/nbdist
+**/nbproject/private
+**/*.ctxt
+**/.mtj.tmp
+**/.mvn/timing.properties
+**/buildNumber.properties
+**/dependency-reduced-pom.xml
+**/hs_err_pid*
+**/pom.xml.next
+**/pom.xml.releaseBackup
+**/pom.xml.tag
+**/pom.xml.versionsBackup
+**/release.properties
+**/replay_pid*

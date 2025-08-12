@@ -1,0 +1,13 @@
+# Ultra-minimal Dockerfile for Smithery deployment
+# Uses pre-built jar file - no compilation needed
+FROM eclipse-temurin:21-jre-jammy
+
+WORKDIR /app
+
+# Copy the pre-built jar file from root directory
+COPY twitch-mcp-server.jar server.jar
+
+EXPOSE 8080
+
+# Simple command to run the Java MCP server
+CMD ["java", "-jar", "server.jar"]
