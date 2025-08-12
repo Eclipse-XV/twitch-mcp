@@ -1,0 +1,94 @@
+# Version control
+.git/
+.gitignore
+.svn/
+.hg/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+
+# Java
+*.class
+target/
+.gradle/
+
+# Build outputs
+build/
+dist/
+out/
+
+# Test and debug files
+test/
+tests/
+*_test.go
+debug/
+*.log
+
+# Python (for completeness)
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+
+# Go (for completeness)
+/vendor/
+*.test
+.go-cache/
+
+# Environment and secrets
+.env*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Temporary and local files
+tmp/
+temp/
+*.tmp
+.local/
+local/
+
+# Documentation
+README*
+*.md
+docs/
+
+# Docker files
+Dockerfile*
+docker-compose*
+
+# Project-specific
+DO NOT UPLOAD TO GIT/
+old dockerfiles/
+glama testing/
+dockerfile testings/
+
+# Miscellaneous
+*.tgz
+*.fixed
+*.native
+*.native-micro
+
+# Exclude empty directories (optional, if not needed)
+**/.empty
+
+# Explicitly allow lock files and build scripts
+!*.lock
+!.mvnw
+!.mvnw.cmd
+!.gradlew
+
+# Exclude Java build artifacts but keep build scripts
+# (already covered above)

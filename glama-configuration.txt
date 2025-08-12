@@ -1,0 +1,59 @@
+GLAMA.AI TWITCH MCP SERVER CONFIGURATION
+=====================================
+
+BUILD STEPS (JSON Array):
+[
+  "apt-get update",
+  "apt-get install -y --no-install-recommends build-essential curl wget software-properties-common libssl-dev zlib1g-dev git",
+  "rm -rf /var/lib/apt/lists/*",
+  "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -",
+  "apt-get install -y nodejs",
+  "apt-get clean",
+  "npm install -g mcp-proxy@5.5.4",
+  "npm install -g pnpm@10.14.0",
+  "node --version",
+  "curl -LsSf https://astral.sh/uv/install.sh | sh",
+  "export PATH=\"/root/.local/bin:$PATH\"",
+  "uv python install 3.13 --default --preview",
+  "ln -s $(uv python find) /usr/local/bin/python",
+  "python --version",
+  "apt-get clean",
+  "rm -rf /var/lib/apt/lists/*",
+  "rm -rf /tmp/*",
+  "rm -rf /var/tmp/*",
+  "git clone https://github.com/Eclipse-XV/twitch-mcp .",
+  "git checkout c11034e3a4f4257db94a58403f73019315feef1f",
+  "apt-get update",
+  "apt-get install -y --no-install-recommends curl ca-certificates gnupg wget git maven",
+  "rm -rf /var/lib/apt/lists/*",
+  "wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /usr/share/keyrings/adoptium.gpg >/dev/null",
+  "echo \"deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(. /etc/os-release; echo $VERSION_CODENAME) main\" > /etc/apt/sources.list.d/adoptium.list",
+  "apt-get update",
+  "apt-get install -y --no-install-recommends temurin-21-jdk",
+  "rm -rf /var/lib/apt/lists/*",
+  "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -",
+  "apt-get install -y --no-install-recommends nodejs",
+  "rm -rf /var/lib/apt/lists/*",
+  "npm i -g mcp-proxy@5.5.3",
+  "rm -f src/main/java/be/tomcools/twitchmcp/api/ChatResource.java || true",
+  "mvn -B -e -DskipTests package",
+  "npm ci --prefix twitch-mcp-npm",
+  "cp target/twitch-mcp-*-runner.jar twitch-mcp-npm/lib/twitch-mcp-runner.jar"
+]
+
+CMD ARGUMENTS (JSON Array):
+["mcp-proxy", "--", "node", "twitch-mcp-npm/bin/twitch-mcp.js"]
+
+PLACEHOLDER PARAMETERS (JSON Object):
+{
+  "TWITCH_CHANNEL": "test_channel",
+  "TWITCH_AUTH": "oauth:test_token",
+  "TWITCH_CLIENT_ID": "test_client_id",
+  "TWITCH_BROADCASTER_ID": "test_broadcaster_id"
+}
+
+INSTRUCTIONS:
+1. Copy the BUILD STEPS JSON array into the "Build steps" textbox
+2. Copy the CMD ARGUMENTS JSON array into the "CMD arguments" textbox
+3. Copy the PLACEHOLDER PARAMETERS JSON object into the "Placeholder parameters" textbox
+4. Click the "Deploy" button to test your configuration

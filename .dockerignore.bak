@@ -1,0 +1,15 @@
+*
+# Allow Quarkus source/build files when building from source
+!pom.xml
+!.mvn/**
+!mvnw
+!src/**
+
+# Allow the NPM package (used by inspectable image)
+!twitch-mcp-npm/**
+
+# Allow prebuilt artifacts if present
+!target/*-runner
+!target/*-runner.jar
+!target/lib/*
+!target/quarkus-app/*

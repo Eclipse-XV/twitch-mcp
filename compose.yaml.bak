@@ -1,0 +1,25 @@
+services:
+  js-twitch-mcp-npm:
+    build:
+      context: ./twitch-mcp-npm
+      dockerfile: ../twitch-mcp-npmDockerfile
+    container_name: js-twitch-mcp-npm
+    restart: unless-stopped
+    init: true
+    # env_file: ./.env  # Uncomment if .env file exists
+    # No ports exposed; service is intended for stdio/AI tool integration
+    # See README for configuration via config file or environment variables
+
+  java-twitchmcp:
+    build:
+      context: ./src/main/java/be/tomcools/twitchmcp
+      dockerfile: ./Dockerfile
+    container_name: java-twitchmcp
+    restart: unless-stopped
+    # env_file: ./.env  # Uncomment if .env file exists
+    ports:
+      - "8080:8080"  # Exposed by Dockerfile, Quarkus default
+    # No explicit depends_on; services are independent unless AI tool orchestrates
+
+# No external services (databases, caches, etc.) are required per documentation
+# No volumes section needed as there are no persistent data requirements

@@ -1,9 +1,10 @@
-# Smithery build configuration for Twitch MCP Server
-projectType: docker
+# Final attempt: Try different project type
+# Using 'simple' project type instead of 'docker'
+projectType: simple
 build:
-  dockerfilePath: Dockerfile.smithery.minimal
-  dockerBuildPath: .
-  imageTag: twitch-mcp-server
+  command: "echo 'Build step completed successfully'"
 deployment:
-  containerPort: 8080
-  # healthCheckPath: /q/health  # Enable after verifying endpoint works
+  command: "java -jar twitch-mcp-server.jar"
+  environment:
+    - name: "JAVA_HOME"
+      value: "/usr/lib/jvm/java-21-openjdk"

@@ -1,0 +1,48 @@
+PowerShell 7.5.2
+PS C:\Git Repos\twitch-mcp\twitch-mcp-npm> npm pkg fix
+PS C:\Git Repos\twitch-mcp\twitch-mcp-npm> npm version patch -m "chore: release %s"
+v1.1.1
+PS C:\Git Repos\twitch-mcp\twitch-mcp-npm> npm publish --access public
+npm notice
+npm notice package: twitch-mcp-server@1.1.1
+npm notice Tarball Contents
+npm notice 1.1kB LICENSE
+npm notice 4.9kB README.md
+npm notice 4.0kB bin/twitch-mcp.js
+npm notice 4.3kB lib/config-utils.js
+npm notice 2.1kB lib/java-utils.js
+npm notice 27.5MB lib/twitch-mcp-runner.jar
+npm notice 698B package.json
+npm notice Tarball Details
+npm notice name: twitch-mcp-server
+npm notice version: 1.1.1
+npm notice filename: twitch-mcp-server-1.1.1.tgz
+npm notice package size: 23.0 MB
+npm notice unpacked size: 27.5 MB
+npm notice shasum: faf4feae6b2f0ea92a1c719d6d175ddeaf214865
+npm notice integrity: sha512-IOY0lDrhucEwQ[...]9RMsIGfZUiS1g==
+npm notice total files: 7
+npm notice
+npm notice Publishing to https://registry.npmjs.org/ with tag latest and public access
++ twitch-mcp-server@1.1.1
+PS C:\Git Repos\twitch-mcp\twitch-mcp-npm> npx twitch-mcp-server@latest --help
+Need to install the following packages:
+twitch-mcp-server@1.1.1
+Ok to proceed? (y) y
+
+Usage: twitch-mcp.js [options]
+
+Options:
+      --version                  Show version number                   [boolean]
+  -c, --channel                  Twitch channel name                    [string]
+  -a, --auth                     Twitch OAuth token (with oauth: prefix)[string]
+  -i, --client-id                Twitch Client ID                       [string]
+  -b, --broadcaster-id           Twitch Broadcaster ID                  [string]
+      --show-connection-message  Show connection message in chat
+                                                      [boolean] [default: false]
+      --jar-path                 Path to the JAR file (if you have a local copy)
+                                                                        [string]
+  -f, --config                   Path to a JSON config file (defaults to
+                                 OS-specific location)                  [string]
+  -h, --help                     Show help                             [boolean]
+PS C:\Git Repos\twitch-mcp\twitch-mcp-npm>

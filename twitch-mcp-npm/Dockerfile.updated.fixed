@@ -1,0 +1,44 @@
+# --- Build the Java application ---
+FROM eclipse-temurin:17-jdk AS java-build
+WORKDIR /build
+
+# Copy Maven files
+COPY pom.xml mvnw mvnw.cmd .mvn ./ 
+COPY src ./src/
+
+# Build the Java application
+RUN chmod +x mvnw && ./mvnw package -DskipTests
+
+# --- Build the NPM package ---
+FROM node:22.13.1-slim AS npm-build
+WORKDIR /app
+
+# Copy NPM files
+COPY twitch-mcp-npm/package.json twitch-mcp-npm/package-lock.json ./
+RUN npm ci --production && npm cache clean --force
+COPY twitch-mcp-npm . .
+
+# --- Create the final runtime image ---
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+# Create a non-privileged user
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup appuser
+
+# Copy the built Java application
+COPY --from=java-build --chown=appuser:appgroup /build/target/*.jar /app/app.jar
+
+# Copy the NPM package
+COPY --from=npm-build --chown=appuser:appgroup /app /app
+
+# Set permissions and expose port
+USER appuser
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/q/health || exit 1
+
+# Start the application
+CMD ["sh", "-c", "exec java -jar /app/app.jar"]

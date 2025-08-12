@@ -1,0 +1,26 @@
+# Ultra-simple Dockerfile for Smithery deployment
+# Builds from existing source without git operations
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+
+WORKDIR /build
+
+# Copy the entire repository
+COPY . .
+
+# Remove legacy REST resource that requires JAX-RS
+RUN rm -f src/main/java/be/tomcools/twitchmcp/api/ChatResource.java || true
+
+# Build the Java application
+RUN mvn -B -DskipTests package && \
+    cp target/*-runner.jar app.jar
+
+# Runtime stage
+FROM eclipse-temurin:21-jre-jammy
+
+WORKDIR /app
+COPY --from=build /build/app.jar server.jar
+
+EXPOSE 8080
+
+# Simple command to run the Java MCP server
+CMD ["java", "-jar", "server.jar"]
