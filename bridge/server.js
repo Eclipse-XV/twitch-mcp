@@ -105,13 +105,13 @@ function forwardJsonRpc(requestBody, cb) {
   if (!javaProc) {
     try {
       startJava();
-      // Give Java a moment to start before sending requests
+      // Brief delay for Java startup
       setTimeout(() => {
         if (!javaProc) {
           return cb(new Error('Java MCP server failed to start'));
         }
         processRequest();
-      }, 500); // Increased delay to 500ms
+      }, 100); // Reduced to 100ms for faster response
       return;
     } catch (error) {
       return cb(new Error(`Failed to start Java MCP server: ${error.message}`));
@@ -237,8 +237,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  // Don't start Java immediately - wait for first POST to avoid startup issues with missing config
-  // startJava(); // commented out - will start on first POST request
+  // Start Java immediately now that lazy loading is implemented in Java code
+  startJava();
   // eslint-disable-next-line no-console
   console.log(`MCP HTTP bridge listening on :${PORT} at /mcp`);
 });
