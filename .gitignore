@@ -59,3 +59,16 @@ twitch_debug.log*
 application-local.properties
 application-dev.properties
 claude_desktop_config.json
+
+# Added to reduce repo size/context
+# Node modules and npm artifacts
+/twitch-mcp-npm/node_modules/
+/twitch-mcp-npm/*.tgz
+
+# Local prebuilt jar copied for tests only
+/twitch-mcp-server.jar
+
+# Large archives not needed in repo
+/*.zip
+/gh.zip
+/gh-windows.zip
