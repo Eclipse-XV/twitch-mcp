@@ -20,6 +20,13 @@ let currentConfig = {};
 // Map of pending HTTP responses by JSON-RPC id
 const pending = new Map();
 
+function writeFramedJsonRpc(child, obj) {
+  const json = Buffer.from(JSON.stringify(obj), 'utf8');
+  const header = Buffer.from(`Content-Length: ${json.length}\r\n\r\n`, 'utf8');
+  child.stdin.write(header);
+  child.stdin.write(json);
+}
+
 function startJava() {
   if (javaProc) {
     try { javaProc.kill(); } catch (_) {}
@@ -32,17 +39,30 @@ function startJava() {
     stdio: ['pipe', 'pipe', 'pipe']
   });
 
-  let stdoutBuffer = '';
+  let stdoutBuffer = Buffer.alloc(0);
   javaProc.stdout.on('data', (chunk) => {
-    stdoutBuffer += chunk.toString('utf8');
-    // Process by lines
-    let idx;
-    while ((idx = stdoutBuffer.indexOf('\n')) !== -1) {
-      const line = stdoutBuffer.slice(0, idx).trim();
-      stdoutBuffer = stdoutBuffer.slice(idx + 1);
-      if (!line) continue;
+    stdoutBuffer = Buffer.concat([stdoutBuffer, Buffer.from(chunk)]);
+    // Parse framed messages: headers \r\n\r\n then body of Content-Length
+    while (true) {
+      const sepIndex = stdoutBuffer.indexOf('\r\n\r\n');
+      if (sepIndex === -1) break;
+      const headerBuf = stdoutBuffer.subarray(0, sepIndex).toString('utf8');
+      const rest = stdoutBuffer.subarray(sepIndex + 4);
+      const match = /Content-Length:\s*(\d+)/i.exec(headerBuf);
+      if (!match) {
+        // Drop invalid header
+        stdoutBuffer = rest;
+        continue;
+      }
+      const len = Number(match[1] || 0);
+      if (rest.length < len) {
+        // wait for more data
+        break;
+      }
+      const payload = rest.subarray(0, len);
+      stdoutBuffer = rest.subarray(len);
       try {
-        const msg = JSON.parse(line);
+        const msg = JSON.parse(payload.toString('utf8'));
         if (msg && Object.prototype.hasOwnProperty.call(msg, 'id')) {
           const handler = pending.get(String(msg.id));
           if (handler) {
@@ -51,7 +71,7 @@ function startJava() {
           }
         }
       } catch (_) {
-        // Not JSON or partial line; ignore
+        // ignore malformed json
       }
     }
   });
@@ -101,10 +121,9 @@ function forwardJsonRpc(requestBody, cb) {
     if (!item || typeof item !== 'object') return done(new Error('Invalid JSON-RPC payload'));
     const id = item.id;
     if (typeof id === 'undefined' || id === null) return done(new Error('JSON-RPC id is required'));
-    const line = JSON.stringify(item) + '\n';
     pending.set(String(id), done);
     try {
-      javaProc.stdin.write(line, 'utf8');
+      writeFramedJsonRpc(javaProc, item);
     } catch (e) {
       pending.delete(String(id));
       return done(e);
