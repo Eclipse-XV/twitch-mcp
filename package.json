@@ -1,0 +1,17 @@
+{
+  "name": "twitch-mcp-bridge",
+  "private": true,
+  "version": "0.0.0",
+  "description": "HTTP bridge exposing /mcp and proxying to Java stdio MCP server",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node bridge/server.js"
+  },
+  "dependencies": {}
+}
+
+
