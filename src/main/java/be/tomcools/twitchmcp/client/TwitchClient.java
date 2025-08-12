@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
+import java.util.Optional;
 import org.apache.hc.client5.http.classic.methods.HttpPatch;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -30,20 +31,36 @@ public class TwitchClient {
     @Inject
     CamelRoute camelRoute;
 
-    @ConfigProperty(name = "twitch.auth", defaultValue = "")
-    String authToken;
+    @ConfigProperty(name = "twitch.auth")
+    Optional<String> authTokenOpt;
 
-    @ConfigProperty(name = "twitch.client_id", defaultValue = "")
-    String clientId;
+    @ConfigProperty(name = "twitch.client_id")
+    Optional<String> clientIdOpt;
 
-    @ConfigProperty(name = "twitch.broadcaster_id", defaultValue = "")
-    String broadcasterId;
+    @ConfigProperty(name = "twitch.broadcaster_id")
+    Optional<String> broadcasterIdOpt;
 
     @ConfigProperty(name = "twitch.show_connection_message", defaultValue = "false")
     boolean showConnectionMessage;
 
+    // Helper methods to get config values
+    private String getAuthToken() {
+        return authTokenOpt.orElse("");
+    }
+    
+    private String getClientId() {
+        return clientIdOpt.orElse("");
+    }
+    
+    private String getBroadcasterId() {
+        return broadcasterIdOpt.orElse("");
+    }
+
     // Helper method to check if Twitch is configured
     private boolean isTwitchConfigured() {
+        String authToken = getAuthToken();
+        String clientId = getClientId();
+        String broadcasterId = getBroadcasterId();
         return authToken != null && !authToken.trim().isEmpty() &&
                clientId != null && !clientId.trim().isEmpty() &&
                broadcasterId != null && !broadcasterId.trim().isEmpty();
@@ -80,8 +97,8 @@ public class TwitchClient {
         URL url = new URL("https://api.twitch.tv/helix/polls");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + authToken.replace("oauth:", ""));
-        conn.setRequestProperty("Client-Id", clientId);
+        conn.setRequestProperty("Authorization", "Bearer " + getAuthToken().replace("oauth:", ""));
+        conn.setRequestProperty("Client-Id", getClientId());
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
 
@@ -93,7 +110,7 @@ public class TwitchClient {
 
         String json = String.format(
             "{\"broadcaster_id\":\"%s\",\"title\":\"%s\",\"choices\":[%s],\"duration\":%d}",
-            broadcasterId, title, choicesJson.toString(), duration
+            getBroadcasterId(), title, choicesJson.toString(), duration
         );
 
         try (OutputStream os = conn.getOutputStream()) {
@@ -116,8 +133,8 @@ public class TwitchClient {
         URL url = new URL("https://api.twitch.tv/helix/predictions");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + authToken.replace("oauth:", ""));
-        conn.setRequestProperty("Client-Id", clientId);
+        conn.setRequestProperty("Authorization", "Bearer " + getAuthToken().replace("oauth:", ""));
+        conn.setRequestProperty("Client-Id", getClientId());
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
 
@@ -129,7 +146,7 @@ public class TwitchClient {
 
         String json = String.format(
             "{\"broadcaster_id\":\"%s\",\"title\":\"%s\",\"outcomes\":[%s],\"prediction_window\":%d}",
-            broadcasterId, title, outcomesJson.toString(), duration
+            getBroadcasterId(), title, outcomesJson.toString(), duration
         );
 
         try (OutputStream os = conn.getOutputStream()) {
@@ -246,8 +263,8 @@ public class TwitchClient {
         URL url = new URL("https://api.twitch.tv/helix/users?login=" + username);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("Authorization", "Bearer " + authToken.replace("oauth:", ""));
-        conn.setRequestProperty("Client-Id", clientId);
+        conn.setRequestProperty("Authorization", "Bearer " + getAuthToken().replace("oauth:", ""));
+        conn.setRequestProperty("Client-Id", getClientId());
         int responseCode = conn.getResponseCode();
         if (responseCode == 200) {
             StringBuilder response = new StringBuilder();
@@ -284,13 +301,13 @@ public class TwitchClient {
         URL url = new URL("https://api.twitch.tv/helix/moderation/bans");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + authToken.replace("oauth:", ""));
-        conn.setRequestProperty("Client-Id", clientId);
+        conn.setRequestProperty("Authorization", "Bearer " + getAuthToken().replace("oauth:", ""));
+        conn.setRequestProperty("Client-Id", getClientId());
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
         String json = String.format(
             "{\"broadcaster_id\":\"%s\",\"moderator_id\":\"%s\",\"data\":{\"user_id\":\"%s\",\"reason\":\"%s\",\"duration\":%d}}",
-            broadcasterId, broadcasterId, userId, reason, duration
+            getBroadcasterId(), getBroadcasterId(), userId, reason, duration
         );
         try (OutputStream os = conn.getOutputStream()) {
             os.write(json.getBytes());
@@ -330,13 +347,13 @@ public class TwitchClient {
         URL url = new URL("https://api.twitch.tv/helix/moderation/bans");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + authToken.replace("oauth:", ""));
-        conn.setRequestProperty("Client-Id", clientId);
+        conn.setRequestProperty("Authorization", "Bearer " + getAuthToken().replace("oauth:", ""));
+        conn.setRequestProperty("Client-Id", getClientId());
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
         String json = String.format(
             "{\"broadcaster_id\":\"%s\",\"moderator_id\":\"%s\",\"data\":{\"user_id\":\"%s\",\"reason\":\"%s\"}}",
-            broadcasterId, broadcasterId, userId, reason
+            getBroadcasterId(), getBroadcasterId(), userId, reason
         );
         try (OutputStream os = conn.getOutputStream()) {
             os.write(json.getBytes());
@@ -380,11 +397,11 @@ public class TwitchClient {
             return "Twitch configuration not available. Please configure TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, and TWITCH_AUTH environment variables.";
         }
         
-        URL url = new URL("https://api.twitch.tv/helix/clips?broadcaster_id=" + broadcasterId);
+        URL url = new URL("https://api.twitch.tv/helix/clips?broadcaster_id=" + getBroadcasterId());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + authToken.replace("oauth:", ""));
-        conn.setRequestProperty("Client-Id", clientId);
+        conn.setRequestProperty("Authorization", "Bearer " + getAuthToken().replace("oauth:", ""));
+        conn.setRequestProperty("Client-Id", getClientId());
         conn.setRequestProperty("Content-Type", "application/json");
 
         int responseCode = conn.getResponseCode();
@@ -484,14 +501,14 @@ public class TwitchClient {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPatch httpPatch = new HttpPatch("https://api.twitch.tv/helix/channels");
-            String bearerToken = authToken.replace("oauth:", "");
+            String bearerToken = getAuthToken().replace("oauth:", "");
             httpPatch.setHeader("Authorization", "Bearer " + bearerToken);
-            httpPatch.setHeader("Client-Id", clientId);
+            httpPatch.setHeader("Client-Id", getClientId());
             httpPatch.setHeader("Content-Type", "application/json");
 
             // Escape quotes in the title to prevent JSON formatting issues
             String escapedTitle = newTitle.replace("\"", "\\\"");
-            String json = String.format("{\"broadcaster_id\":\"%s\",\"title\":\"%s\"}", broadcasterId, escapedTitle);
+            String json = String.format("{\"broadcaster_id\":\"%s\",\"title\":\"%s\"}", getBroadcasterId(), escapedTitle);
             
             httpPatch.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
@@ -533,8 +550,8 @@ public class TwitchClient {
         URL searchUrl = new URL("https://api.twitch.tv/helix/search/categories?query=" + encodedQuery);
         HttpURLConnection searchConn = (HttpURLConnection) searchUrl.openConnection();
         searchConn.setRequestMethod("GET");
-        searchConn.setRequestProperty("Authorization", "Bearer " + authToken.replace("oauth:", ""));
-        searchConn.setRequestProperty("Client-Id", clientId);
+        searchConn.setRequestProperty("Authorization", "Bearer " + getAuthToken().replace("oauth:", ""));
+        searchConn.setRequestProperty("Client-Id", getClientId());
 
         int searchResponseCode = searchConn.getResponseCode();
         if (searchResponseCode != 200) {
@@ -564,12 +581,12 @@ public class TwitchClient {
         // Step 2: Patch the channel with the new game_id
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPatch httpPatch = new HttpPatch("https://api.twitch.tv/helix/channels");
-            String bearerToken = authToken.replace("oauth:", "");
+            String bearerToken = getAuthToken().replace("oauth:", "");
             httpPatch.setHeader("Authorization", "Bearer " + bearerToken);
-            httpPatch.setHeader("Client-Id", clientId);
+            httpPatch.setHeader("Client-Id", getClientId());
             httpPatch.setHeader("Content-Type", "application/json");
 
-            String json = String.format("{\"broadcaster_id\":\"%s\",\"game_id\":\"%s\"}", broadcasterId, categoryId);
+            String json = String.format("{\"broadcaster_id\":\"%s\",\"game_id\":\"%s\"}", getBroadcasterId(), categoryId);
             httpPatch.setEntity(new org.apache.hc.core5.http.io.entity.StringEntity(json, org.apache.hc.core5.http.ContentType.APPLICATION_JSON));
 
             try (var response = httpClient.execute(httpPatch)) {

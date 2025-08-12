@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Optional;
 
 /**
  * Apache Camel route, using camel-irc to connect to Twitch Chat (which is IRC Based).
@@ -18,17 +19,29 @@ public class CamelRoute extends RouteBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(CamelRoute.class);
 
-    @ConfigProperty(name = "twitch.channel", defaultValue = "")
-    String channel;
-    @ConfigProperty(name = "twitch.auth", defaultValue = "")
-    String authToken;
+    @ConfigProperty(name = "twitch.channel")
+    Optional<String> channelOpt;
+    @ConfigProperty(name = "twitch.auth")
+    Optional<String> authTokenOpt;
 
     // Store last 100 messages for analysis
     private final List<String> recentMessages = new CopyOnWriteArrayList<>();
     private static final int MAX_MESSAGES = 100;
+    
+    // Helper methods to get config values
+    private String getChannel() {
+        return channelOpt.orElse("");
+    }
+    
+    private String getAuthToken() {
+        return authTokenOpt.orElse("");
+    }
 
     @Override
     public void configure() throws Exception {
+        String channel = getChannel();
+        String authToken = getAuthToken();
+        
         if (channel == null || channel.isBlank() || authToken == null || authToken.isBlank()) {
             // No Twitch config provided: define stub routes to keep app running and tool listing available
             from("direct:sendToIrc")
