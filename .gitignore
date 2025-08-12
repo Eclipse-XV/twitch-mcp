@@ -65,7 +65,8 @@ claude_desktop_config.json
 /twitch-mcp-npm/node_modules/
 /twitch-mcp-npm/*.tgz
 
-# Local prebuilt jar copied for tests only
+# Local prebuilt jars (root)
+/server.jar
 /twitch-mcp-server.jar
 
 # Large archives not needed in repo
