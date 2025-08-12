@@ -83,11 +83,14 @@ public class TwitchClient {
     }
 
     // Post something to the Twitch chat after connect.
+    // Disabled for Smithery deployment to prevent startup delays
+    /*
     void onStart(@Observes StartupEvent ev) {
         if (showConnectionMessage && isTwitchConfigured()) {
             this.sendMessage("Twitch MCP Server connected");
         }
     }
+    */
 
     public String createPoll(String title, List<String> choices, int duration) throws Exception {
         if (!isTwitchConfigured()) {
