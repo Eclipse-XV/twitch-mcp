@@ -340,11 +340,14 @@ function applyConfigFromQuery(urlObj) {
 }
 
 const server = http.createServer((req, res) => {
+  console.log(`[${new Date().toISOString()}] HTTP Request: ${req.method} ${req.url}`);
+  
   // Simple CORS for tooling
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
+    console.log(`[${new Date().toISOString()}] OPTIONS request handled`);
     res.statusCode = 204; res.end(); return;
   }
 
@@ -356,8 +359,12 @@ const server = http.createServer((req, res) => {
     startJava();
   }
   if (url.pathname !== '/mcp') {
+    console.log(`[${new Date().toISOString()}] 404 - Not found: ${url.pathname}`);
     res.statusCode = 404; res.end('Not Found'); return;
   }
+  
+  console.log(`[${new Date().toISOString()}] MCP request received: ${req.method}`);
+  
 
   if (req.method === 'GET') {
     // Basic health/session info
@@ -375,16 +382,23 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.method === 'POST') {
+    console.log(`[${new Date().toISOString()}] POST request - reading body`);
     let body = '';
-    req.on('data', (chunk) => { body += chunk; if (body.length > 10 * 1024 * 1024) req.destroy(); });
+    req.on('data', (chunk) => { 
+      body += chunk; 
+      if (body.length > 10 * 1024 * 1024) req.destroy(); 
+    });
     req.on('end', () => {
+      console.log(`[${new Date().toISOString()}] POST body received, forwarding to JsonRpc`);
       forwardJsonRpc(body, (err, responsePayload) => {
         if (err) {
+          console.log(`[${new Date().toISOString()}] JsonRpc error: ${err.message}`);
           res.statusCode = err.status || 500;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ jsonrpc: '2.0', error: { code: -32000, message: err.message || 'bridge error', data: err.stderr || undefined } }));
           return;
         }
+        console.log(`[${new Date().toISOString()}] JsonRpc success - sending response`);
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(responsePayload));
       });
@@ -396,11 +410,12 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  // Start Java immediately now that lazy loading is implemented in Java code
-  startJava();
+  // Don't start Java at all during initial container startup - only start on demand
+  // startJava(); // Commented out to prevent startup issues
   // eslint-disable-next-line no-console
   console.log(`[${new Date().toISOString()}] MCP HTTP bridge listening on :${PORT} at /mcp`);
-  console.log(`[${new Date().toISOString()}] Bridge ready for requests`);
+  console.log(`[${new Date().toISOString()}] Bridge ready for requests - NO JAVA STARTUP`);
+  console.log(`[${new Date().toISOString()}] Container startup complete, waiting for requests`);
 });
 
 
