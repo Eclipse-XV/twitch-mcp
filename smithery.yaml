@@ -1,4 +1,27 @@
-version: 1
-start:
-  command: ["java", "-Dquarkus.http.host=0.0.0.0", "-jar", "/app/server.jar"]
-  port: 8080
+runtime: "container"
+build:
+  dockerfile: "Dockerfile"
+  dockerBuildPath: "."
+startCommand:
+  type: "http"
+  configSchema:
+    type: "object"
+    properties:
+      TWITCH_CLIENT_ID:
+        type: "string"
+        description: "Your Twitch app client ID"
+      TWITCH_BROADCASTER_ID:
+        type: "string"
+        description: "Broadcaster/channel ID"
+      TWITCH_CHANNEL:
+        type: "string"
+        description: "Twitch channel name"
+      TWITCH_AUTH:
+        type: "string"
+        description: "Twitch OAuth access token (no oauth: prefix)"
+    required: ["TWITCH_CLIENT_ID", "TWITCH_BROADCASTER_ID", "TWITCH_CHANNEL", "TWITCH_AUTH"]
+  exampleConfig:
+    TWITCH_CLIENT_ID: "your-client-id"
+    TWITCH_BROADCASTER_ID: "123456789"
+    TWITCH_CHANNEL: "yourchannel"
+    TWITCH_AUTH: "your-token"
