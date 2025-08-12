@@ -16,6 +16,8 @@ let javaProc = null;
 let nextSessionId = 1;
 let activeSessionId = null;
 let currentConfig = {};
+let lastStderr = [];
+const MAX_STDERR_LINES = 100;
 
 // Map of pending HTTP responses by JSON-RPC id
 const pending = new Map();
@@ -79,12 +81,20 @@ function startJava() {
   javaProc.stderr.on('data', (chunk) => {
     // For debugging; do not crash bridge on server logs
     process.stderr.write(chunk);
+    const txt = chunk.toString('utf8');
+    for (const line of txt.split(/\r?\n/)) {
+      if (!line) continue;
+      lastStderr.push(line);
+      if (lastStderr.length > MAX_STDERR_LINES) lastStderr.shift();
+    }
   });
 
   javaProc.on('exit', (code) => {
     // Fail pending requests
     for (const [, handler] of pending.entries()) {
-      handler(new Error(`MCP server exited with code ${code}`));
+      const err = new Error(`MCP server exited with code ${code}`);
+      err.stderr = lastStderr.slice(-20).join('\n');
+      handler(err);
     }
     pending.clear();
     javaProc = null;
@@ -195,7 +205,7 @@ const server = http.createServer((req, res) => {
         if (err) {
           res.statusCode = err.status || 500;
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ jsonrpc: '2.0', error: { code: -32000, message: err.message || 'bridge error' } }));
+          res.end(JSON.stringify({ jsonrpc: '2.0', error: { code: -32000, message: err.message || 'bridge error', data: err.stderr || undefined } }));
           return;
         }
         res.setHeader('Content-Type', 'application/json');

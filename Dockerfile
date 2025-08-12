@@ -45,7 +45,7 @@ COPY package.json /app/package.json
 COPY bridge /app/bridge
 
 # Install minimal deps and curl for healthcheck
-RUN npm ci --omit=dev || npm install --omit=dev && \
+RUN npm install --omit=dev && \
     apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
