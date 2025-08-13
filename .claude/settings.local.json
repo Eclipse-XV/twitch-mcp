@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rm:*)",
+      "Bash(git fetch:*)",
+      "Bash(echo \"Created backup branch: $BACKUP_BRANCH\")",
+      "Bash(git stash push:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm install)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
