@@ -35,6 +35,8 @@ When developing this project, we recommend using these AI assistants in order of
 - Best for: Major refactoring, design decisions, complex debugging
 - **Use sparingly** - reserve for when other tools aren't sufficient
 
+💡 **Pro Tip**: For a more natural "agentic" AI experience, try using voice typing software like Windows Voice Typing (Windows key + H). Leave it on throughout your development session - it makes interactions with AI assistants feel more conversational and fluid, especially when explaining complex problems or brainstorming solutions.
+
 ## Building from Source
 
 ### Quick Start
